@@ -1,0 +1,115 @@
+// SIH 26032 — schema frozen per SIH26032_SPEC_V2.md
+// SQLite for the demo; kept Postgres-portable (no SQLite-only features;
+// status is String + TS union because Prisma enums don't exist on SQLite).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Farmer {
+  id            Int               @id @default(autoincrement())
+  phone         String            @unique
+  name          String
+  village       String
+  language      String            @default("en") // "en" | "hi"
+  createdAt     DateTime          @default(now())
+  bookings      Booking[]
+  notifications NotificationLog[]
+}
+
+model Centre {
+  id                Int              @id @default(autoincrement())
+  name              String
+  district          String
+  dailyCapacity     Int
+  avgServiceMinutes Int
+  openTime          String // "09:00"
+  closeTime         String // "18:00"
+  slots             Slot[]
+  bookings          Booking[]
+  arrivals          ArrivalHistory[]
+}
+
+model Slot {
+  id          Int       @id @default(autoincrement())
+  centreId    Int
+  date        String // IST calendar date, "YYYY-MM-DD"
+  windowStart String // "09:00"
+  windowEnd   String // "12:00"
+  capacity    Int
+  bookedCount Int       @default(0)
+  centre      Centre    @relation(fields: [centreId], references: [id])
+  bookings    Booking[]
+
+  @@unique([centreId, date, windowStart])
+  @@index([centreId, date])
+}
+
+model Booking {
+  id               Int            @id @default(autoincrement())
+  farmerId         Int
+  slotId           Int
+  centreId         Int // denormalized from Slot — every queue query skips the join
+  date             String // denormalized IST "YYYY-MM-DD"
+  crop             String
+  quantityQuintals Float
+  ratePerQuintal   Float
+  amountPayable    Float
+  paymentRef       String?
+  tokenNumber      Int
+  status           String         @default("BOOKED") // BookingStatus union, see lib/status.ts
+  threeAwaySent    Boolean        @default(false) // "3 tokens away" SMS fires once per booking
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  farmer           Farmer         @relation(fields: [farmerId], references: [id])
+  slot             Slot           @relation(fields: [slotId], references: [id])
+  centre           Centre         @relation(fields: [centreId], references: [id])
+  events           BookingEvent[]
+
+  @@unique([centreId, date, tokenNumber])
+  @@index([centreId, date, status])
+  @@index([farmerId])
+}
+
+model BookingEvent {
+  id        Int      @id @default(autoincrement())
+  bookingId Int
+  status    String
+  at        DateTime @default(now())
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+model ArrivalHistory {
+  id       Int    @id @default(autoincrement())
+  centreId Int
+  date     String // IST "YYYY-MM-DD"
+  arrivals Int
+  centre   Centre @relation(fields: [centreId], references: [id])
+
+  @@unique([centreId, date])
+}
+
+model NotificationLog {
+  id       Int      @id @default(autoincrement())
+  farmerId Int
+  channel  String   @default("SMS")
+  message  String
+  sentAt   DateTime @default(now())
+  farmer   Farmer   @relation(fields: [farmerId], references: [id])
+
+  @@index([sentAt])
+}
+
+model CropRate {
+  id             Int    @id @default(autoincrement())
+  crop           String @unique
+  ratePerQuintal Float
+  season         String // e.g. "KMS 2026-27"
+}

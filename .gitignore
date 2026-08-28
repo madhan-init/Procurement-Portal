@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SIH26032
+*.db
+*.db-journal
+prisma/test-*.db*
+forecast/.venv/
+forecast/data/
+forecast/__pycache__/
+!.env.example
