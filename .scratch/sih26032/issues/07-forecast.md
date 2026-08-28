@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] Chart renders for all 3 centres (acceptance #3)
-- [ ] Model-quality card shows RF MAE vs seasonal-naive MAE and % improvement
-- [ ] Apply updates the three windows; parts sum exactly to the suggestion; clamp ≥ bookedCount holds (vitest on the split)
-- [ ] Whole flow runs offline against the local service
+- [x] Chart renders for all 3 centres (acceptance #3)
+- [x] Model-quality card shows RF MAE vs seasonal-naive MAE and % improvement
+- [x] Apply updates the three windows; parts sum exactly to the suggestion; clamp ≥ bookedCount holds (vitest on the split)
+- [x] Whole flow runs offline against the local service

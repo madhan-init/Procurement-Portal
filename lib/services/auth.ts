@@ -3,6 +3,7 @@ import { prisma } from "../db";
 import { messages } from "../messages";
 
 const MOCK_OTP = "123456";
+const mockMode = () => process.env.MOCK_MODE === "true";
 
 /** Request an OTP for a phone. Mock mode logs it; reports whether the farmer is new. */
 export async function requestOtp(phone: string, db: PrismaClient = prisma) {
@@ -21,6 +22,10 @@ export async function verifyOtp(
   input: { phone: string; otp: string; name?: string; village?: string; language?: string },
   db: PrismaClient = prisma,
 ): Promise<VerifyResult> {
+  if (!mockMode()) {
+    // v1 has no real OTP gateway by design — refuse rather than silently accept.
+    return { ok: false, error: "OTP gateway not configured — run with MOCK_MODE=true (v1 demo)" };
+  }
   if (input.otp !== MOCK_OTP) return { ok: false, error: "Invalid OTP" };
 
   const existing = await db.farmer.findUnique({ where: { phone: input.phone } });

@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] New phone → OTP → profile form → Home; Farmer row created with chosen language
-- [ ] Seeded phone (Ramesh) → OTP → Home directly, no profile form
-- [ ] Wrong OTP is rejected; session survives a page reload
-- [ ] Mobile-first layout (usable at 390px width)
+- [x] New phone → OTP → profile form → Home; Farmer row created with chosen language
+- [x] Seeded phone (Ramesh) → OTP → Home directly, no profile form
+- [x] Wrong OTP is rejected; session survives a page reload
+- [x] Mobile-first layout (usable at 390px width)

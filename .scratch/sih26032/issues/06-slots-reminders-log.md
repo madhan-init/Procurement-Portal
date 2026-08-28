@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] Capacity edits persist and change the farmer-side % full
-- [ ] Setting capacity below bookedCount is rejected
-- [ ] Reminder blast writes one log row per tomorrow-BOOKED booking, immediately visible in the log screen
-- [ ] Log renders farmer, channel "SMS", message, sent time
+- [x] Capacity edits persist and change the farmer-side % full
+- [x] Setting capacity below bookedCount is rejected
+- [x] Reminder blast writes one log row per tomorrow-BOOKED booking, immediately visible in the log screen
+- [x] Log renders farmer, channel "SMS", message, sent time

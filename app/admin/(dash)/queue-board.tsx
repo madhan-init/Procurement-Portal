@@ -175,8 +175,8 @@ export default function QueueBoard({
                     <td className="px-4 py-2.5 text-right">{b.quantityQuintals}</td>
                     <td className="px-4 py-2.5 text-right">{inr(b.amountPayable)}</td>
                     <td className="px-4 py-2.5">
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[b.status]}`}>
-                        {STATUS_LABEL[b.status]}
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[b.status as keyof typeof STATUS_BADGE]}`}>
+                        {STATUS_LABEL[b.status as keyof typeof STATUS_LABEL]}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-right">

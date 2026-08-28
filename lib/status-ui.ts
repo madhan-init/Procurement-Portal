@@ -1,5 +1,6 @@
 // Client-safe status presentation (no prisma imports).
-export const STATUS_LABEL: Record<string, string> = {
+import type { BookingStatus } from "./status";
+export const STATUS_LABEL: Record<BookingStatus, string> = {
   BOOKED: "Booked",
   ARRIVED: "Arrived",
   SERVING: "Being served",
@@ -11,7 +12,7 @@ export const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Cancelled",
 };
 
-export const STATUS_BADGE: Record<string, string> = {
+export const STATUS_BADGE: Record<BookingStatus, string> = {
   BOOKED: "bg-sky-100 text-sky-800",
   ARRIVED: "bg-amber-100 text-amber-800",
   SERVING: "bg-violet-100 text-violet-800 animate-pulse",

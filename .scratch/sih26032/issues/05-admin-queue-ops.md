@@ -6,8 +6,8 @@
 
 **Status:** ready-for-agent
 
-- [ ] Call next marks the earliest waiting token SERVING
-- [ ] Advance walks the full pipeline; paymentRef at PAYMENT_INITIATED; PAID SMS includes amount
-- [ ] Unauthenticated calls to admin APIs are rejected
-- [ ] Admin advance → farmer tracker updates within 10s and a log entry appears (acceptance #2, with 04)
-- [ ] Vitest: exactly one BookingEvent + one NotificationLog per transition; 3-away SMS fires once and only once per booking
+- [x] Call next marks the earliest waiting token SERVING
+- [x] Advance walks the full pipeline; paymentRef at PAYMENT_INITIATED; PAID SMS includes amount
+- [x] Unauthenticated calls to admin APIs are rejected
+- [x] Admin advance → farmer tracker updates within 10s and a log entry appears (acceptance #2, with 04)
+- [x] Vitest: exactly one BookingEvent + one NotificationLog per transition; 3-away SMS fires once and only once per booking

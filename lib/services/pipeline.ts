@@ -67,7 +67,7 @@ export async function advanceStatus(bookingId: number, to?: BookingStatus, db: P
     return fresh;
   });
 
-  await checkThreeAway(updated.centreId, updated.date, db);
+  await notifyThreeAway(updated.centreId, updated.date, db);
   return updated;
 }
 
@@ -85,7 +85,7 @@ export async function callNext(centreId: number, date: string, db: PrismaClient 
  * After any status change at a centre+date: every waiting booking whose queue
  * position is ≤ 3 gets the heads-up SMS — once per booking, ever.
  */
-export async function checkThreeAway(centreId: number, date: string, db: PrismaClient = prisma) {
+export async function notifyThreeAway(centreId: number, date: string, db: PrismaClient = prisma) {
   const waiting = await db.booking.findMany({
     where: { centreId, date, status: { in: ["BOOKED", "ARRIVED"] } },
     include: { centre: { select: { name: true } } },

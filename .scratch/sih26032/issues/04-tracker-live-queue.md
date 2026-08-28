@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] Tracker shows correct position, now-serving, and ETA against the seeded queue
-- [ ] A status change in the DB is reflected on screen within 10s without reload
-- [ ] Requesting another farmer's booking id is denied
-- [ ] Vitest at the service seam: position/nowServing/ETA across mixed-status fixtures, including SERVING cases
+- [x] Tracker shows correct position, now-serving, and ETA against the seeded queue
+- [x] A status change in the DB is reflected on screen within 10s without reload
+- [x] Requesting another farmer's booking id is denied
+- [x] Vitest at the service seam: position/nowServing/ETA across mixed-status fixtures, including SERVING cases

@@ -40,3 +40,31 @@ export async function queueStatusFor(
   const nowServing = serving._max.tokenNumber ?? completed._max.tokenNumber ?? 0;
   return { position, nowServing, etaMinutes: position * avgServiceMinutes };
 }
+
+/** The queue-wide "now serving" figure — same rule the tracker uses. */
+export async function nowServingFor(centreId: number, date: string, db: PrismaClient = prisma): Promise<number> {
+  const [serving, completed] = await Promise.all([
+    db.booking.aggregate({ where: { centreId, date, status: "SERVING" }, _max: { tokenNumber: true } }),
+    db.booking.aggregate({
+      where: { centreId, date, status: { in: ["WEIGHED", "PROCURED", "PAYMENT_INITIATED", "PAID"] } },
+      _max: { tokenNumber: true },
+    }),
+  ]);
+  return serving._max.tokenNumber ?? completed._max.tokenNumber ?? 0;
+}
+
+/** Measured congestion metrics from real event timestamps (PS bullet 5). */
+export function impactMetrics(rows: { events: { status: string; at: Date | string }[] }[]) {
+  const waits: number[] = [];
+  const services: number[] = [];
+  for (const b of rows) {
+    const at = (st: string) => b.events.find((e) => e.status === st)?.at;
+    const arrived = at("ARRIVED");
+    const serving = at("SERVING");
+    const weighed = at("WEIGHED");
+    if (arrived && serving) waits.push((+new Date(serving) - +new Date(arrived)) / 60_000);
+    if (serving && weighed) services.push((+new Date(weighed) - +new Date(serving)) / 60_000);
+  }
+  const avg = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null);
+  return { avgWaitMin: avg(waits), measuredServiceMin: avg(services) };
+}

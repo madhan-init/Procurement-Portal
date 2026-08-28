@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] Toggle flips every demo-path farmer screen EN ↔ HI and the choice sticks
-- [ ] All four §14 acceptance checks pass on a fresh reset, fully offline
-- [ ] README gets a cold machine to a running demo without help
-- [ ] Judge-questions section covers training data, SMS realism, double-booking, scale
+- [x] Toggle flips every demo-path farmer screen EN ↔ HI and the choice sticks
+- [x] All four §14 acceptance checks pass on a fresh reset, fully offline
+- [x] README gets a cold machine to a running demo without help
+- [x] Judge-questions section covers training data, SMS realism, double-booking, scale

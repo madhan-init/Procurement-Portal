@@ -6,8 +6,8 @@
 
 **Status:** ready-for-agent
 
-- [ ] A farmer books on a phone screen in under 60 seconds and sees a token (acceptance #1)
-- [ ] A full window is unpickable in the UI **and** rejected by the API
-- [ ] Confirmation notification row exists with token, date, centre
-- [ ] amountPayable computed and stored at booking time
-- [ ] Vitest at the service seam: concurrent bookings yield unique sequential tokens and never exceed capacity
+- [x] A farmer books on a phone screen in under 60 seconds and sees a token (acceptance #1)
+- [x] A full window is unpickable in the UI **and** rejected by the API
+- [x] Confirmation notification row exists with token, date, centre
+- [x] amountPayable computed and stored at booking time
+- [x] Vitest at the service seam: concurrent bookings yield unique sequential tokens and never exceed capacity

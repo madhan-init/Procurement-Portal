@@ -13,8 +13,8 @@ BOOKED → ARRIVED → SERVING → WEIGHED → PROCURED → PAYMENT_INITIATED �
 
 **Status:** ready-for-agent
 
-- [ ] `npm run demo:reset` destructively reseeds everything relative to *now* and exits clean
-- [ ] Schema encodes: SERVING; Booking denormalizes centreId + date (IST `YYYY-MM-DD` string), carries ratePerQuintal/amountPayable/paymentRef and the 3-away sent-once flag; unique (centreId, date, tokenNumber)
-- [ ] Seeded today-queue spans all statuses; arrivals CSV exists (3 centres × 180 days, v1 §9 formula)
-- [ ] CropRate holds ~5 procured crops with real MSP figures
-- [ ] `npm run dev` boots; uv venv resolves and `uvicorn` starts against a stub app
+- [x] `npm run demo:reset` destructively reseeds everything relative to *now* and exits clean
+- [x] Schema encodes: SERVING; Booking denormalizes centreId + date (IST `YYYY-MM-DD` string), carries ratePerQuintal/amountPayable/paymentRef and the 3-away sent-once flag; unique (centreId, date, tokenNumber)
+- [x] Seeded today-queue spans all statuses; arrivals CSV exists (3 centres × 180 days, v1 §9 formula)
+- [x] CropRate holds ~5 procured crops with real MSP figures
+- [x] `npm run dev` boots; uv venv resolves and `uvicorn` starts against a stub app

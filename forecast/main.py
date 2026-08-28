@@ -6,6 +6,7 @@ RandomForestRegressor over [day_of_week, week_index, rolling_mean_7, centre_id],
 holding out the last 14 days. Reports MAE against a seasonal-naive baseline
 (same weekday, previous week) — the honest yardstick for a synthetic dataset.
 """
+import math
 from pathlib import Path
 
 import pandas as pd
@@ -111,11 +112,13 @@ def forecast(centre_id: int, days: int = 7):
         )
         pred = max(0.0, float(state["model"].predict(row[FEATURES])[0]))
         history.append(pred)
+        predicted = round(pred)
         out.append(
             {
                 "date": date.strftime("%Y-%m-%d"),
-                "predicted_arrivals": round(pred),
-                "suggested_capacity": int(-(-pred * CAPACITY_BUFFER // 1)),  # ceil
+                "predicted_arrivals": predicted,
+                # spec: suggested = ceil(predicted_arrivals × 1.15) — from the served figure
+                "suggested_capacity": math.ceil(predicted * CAPACITY_BUFFER),
             }
         )
     return out
