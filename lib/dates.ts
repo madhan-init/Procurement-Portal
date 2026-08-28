@@ -33,3 +33,12 @@ export function dayOfWeek(dateStr: string): number {
   // 12:00 IST is 06:30 UTC of the same calendar date, so UTC day == IST day.
   return atIST(dateStr, "12:00").getUTCDay();
 }
+
+/** An IST date string as short human text, e.g. "Fri, 29 Aug". */
+export function prettyDate(dateStr: string): string {
+  return atIST(dateStr, "12:00").toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
