@@ -44,7 +44,10 @@ next-env.d.ts
 *.db
 *.db-journal
 prisma/test-*.db*
-forecast/.venv/
-forecast/data/
-forecast/__pycache__/
 !.env.example
+
+# agent tooling, review artifacts, tests and scratch notes — kept local
+.claude/
+.impeccable/
+tests/
+.scratch/
