@@ -1,8 +1,6 @@
 // Destructive seed, always relative to IST "now". Run via `npm run demo:reset`.
 import { PrismaClient, type Centre, type Farmer } from "@prisma/client";
-import fs from "node:fs";
-import path from "node:path";
-import { istToday, addDays, atIST, dayOfWeek } from "../lib/dates";
+import { istToday, addDays, atIST } from "../lib/dates";
 import { STATUS_ORDER, pipelineIndex, type BookingStatus } from "../lib/status";
 import { messages, statusMessage } from "../lib/messages";
 
@@ -18,11 +16,6 @@ function mulberry32(seed: number) {
   };
 }
 const rand = mulberry32(26032);
-function gaussian(): number {
-  const u = 1 - rand();
-  const v = rand();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
 
 const WINDOWS = [
   { start: "09:00", end: "12:00" },
@@ -210,27 +203,6 @@ async function main() {
     if (n > 0) await prisma.slot.update({ where: { id: s.id }, data: { bookedCount: n } });
   }
 
-  // ---- ArrivalHistory: 180 days/centre (v1 §9 formula) + training CSV ----
-  const DOW_FACTOR = [0.1, 1.3, 1.2, 1.0, 0.9, 0.8, 0.5]; // Sun..Sat
-  const csv: string[] = ["centre_id,date,arrivals"];
-  const historyRows: { centreId: number; date: string; arrivals: number }[] = [];
-  for (const centre of centres) {
-    const base = centre.dailyCapacity; // 60 / 90 / 45
-    for (let i = 180; i >= 1; i--) {
-      const date = addDays(today, -i);
-      const j = 180 - i; // 0..179, harvest peak mid-window
-      const season = 0.4 + 1.2 * Math.exp(-((j - 90) ** 2) / (2 * 45 ** 2));
-      const noise = gaussian() * base * 0.08;
-      const arrivals = Math.max(0, Math.round(base * DOW_FACTOR[dayOfWeek(date)] * season + noise));
-      historyRows.push({ centreId: centre.id, date, arrivals });
-      csv.push(`${centre.id},${date},${arrivals}`);
-    }
-  }
-  await prisma.arrivalHistory.createMany({ data: historyRows });
-  const csvPath = path.join(__dirname, "..", "forecast", "data", "arrivals.csv");
-  fs.mkdirSync(path.dirname(csvPath), { recursive: true });
-  fs.writeFileSync(csvPath, csv.join("\n") + "\n");
-
   // ---- Summary ----
   const counts = {
     centres: await prisma.centre.count(),
@@ -239,10 +211,8 @@ async function main() {
     bookings: await prisma.booking.count(),
     events: await prisma.bookingEvent.count(),
     notifications: await prisma.notificationLog.count(),
-    arrivalDays: await prisma.arrivalHistory.count(),
   };
   console.log("Seeded:", counts);
-  console.log(`CSV: ${csvPath}`);
   console.log(`Demo login — farmer: +919876500001 (OTP 123456) · admin: admin/admin123`);
 }
 

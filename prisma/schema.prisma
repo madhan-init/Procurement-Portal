@@ -32,7 +32,6 @@ model Centre {
   closeTime         String // "18:00"
   slots             Slot[]
   bookings          Booking[]
-  arrivals          ArrivalHistory[]
 }
 
 model Slot {
@@ -84,16 +83,6 @@ model BookingEvent {
   booking   Booking  @relation(fields: [bookingId], references: [id])
 
   @@index([bookingId])
-}
-
-model ArrivalHistory {
-  id       Int    @id @default(autoincrement())
-  centreId Int
-  date     String // IST "YYYY-MM-DD"
-  arrivals Int
-  centre   Centre @relation(fields: [centreId], references: [id])
-
-  @@unique([centreId, date])
 }
 
 model NotificationLog {

@@ -26,15 +26,6 @@ export const STATUS_BADGE: Record<BookingStatus, string> = {
   CANCELLED: "bg-gray-200 text-gray-600",
 };
 
-// Validated chart palette (dataviz six-checks, light surface):
-export const CHART = {
-  forecast: "#3B6D11", // leaf — forecast arrivals
-  booked: "#2E7CC0", //  blue — booked so far
-  suggested: "#854F0B", // wheat — suggested capacity line
-  miniBar: "#3B6D11", //  right-rail bars
-  miniPeak: "#D97706", // right-rail peak highlight
-} as const;
-
 export function inr(n: number): string {
   return `₹${Math.round(n).toLocaleString("en-IN")}`;
 }

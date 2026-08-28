@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 const TABS = [
   { href: "/admin", label: "Today's queue" },
   { href: "/admin/slots", label: "Slots" },
-  { href: "/admin/forecast", label: "Forecast" },
   { href: "/admin/notifications", label: "Notifications" },
 ];
 

@@ -1,9 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { STATUS_LABEL, STATUS_BADGE, CHART, inr } from "@/lib/status-ui";
+import { STATUS_LABEL, STATUS_BADGE, inr } from "@/lib/status-ui";
 import { STATUS_ORDER } from "@/lib/status";
-import { IconChart, IconMegaphone, IconSend } from "@/components/icons";
+import { IconMegaphone, IconSend } from "@/components/icons";
 
 type Row = {
   id: number;
@@ -29,108 +28,6 @@ const NEXT_LABEL: Record<string, string> = {
   PROCURED: "Initiate payment",
   PAYMENT_INITIATED: "Mark paid",
 };
-
-const weekday = (d: string) => new Date(`${d}T12:00:00+05:30`).toLocaleDateString("en-IN", { weekday: "short" });
-
-type ForecastRow = { date: string; predicted_arrivals: number; suggested_capacity: number };
-
-function ForecastRailCard({ centreId }: { centreId: number }) {
-  const [rows, setRows] = useState<ForecastRow[] | null>(null);
-  const [offline, setOffline] = useState(false);
-  const [applyMsg, setApplyMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const [applying, setApplying] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setRows(null);
-    setOffline(false);
-    setApplyMsg(null);
-    fetch(`/api/forecast?centreId=${centreId}&days=7`, { cache: "no-store" })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("forecast offline");
-        const json = await res.json();
-        if (!cancelled) setRows(json.rows ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setOffline(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [centreId]);
-
-  const max = rows?.length ? Math.max(...rows.map((r) => r.predicted_arrivals)) : 0;
-  const peak = rows?.length ? rows.reduce((a, b) => (b.predicted_arrivals > a.predicted_arrivals ? b : a)) : null;
-
-  async function applySuggestion() {
-    if (!peak) return;
-    setApplying(true);
-    setApplyMsg(null);
-    const res = await fetch("/api/admin/forecast/apply", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ centreId, date: peak.date, suggested: peak.suggested_capacity }),
-    });
-    setApplying(false);
-    if (res.ok) {
-      setApplyMsg({ kind: "ok", text: `Capacity for ${peak.date} set to ${peak.suggested_capacity}` });
-    } else {
-      setApplyMsg({ kind: "err", text: (await res.json()).error ?? "Apply failed" });
-    }
-  }
-
-  return (
-    <div className="rounded-xl bg-white p-4 ring-1 ring-gray-200/60">
-      <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold">
-          <IconChart size={16} className="text-leaf-600" /> Arrivals forecast · 7 days
-        </h2>
-      </div>
-      {offline ? (
-        <p className="mt-3 text-xs text-gray-400">Forecast service offline — npm run forecast</p>
-      ) : !rows ? (
-        <p className="mt-3 text-xs text-gray-400">Loading…</p>
-      ) : rows.length === 0 ? (
-        <p className="mt-3 text-xs text-gray-400">No forecast rows yet.</p>
-      ) : (
-        <>
-          <div className="mt-3 flex h-16 items-end gap-1">
-            {rows.map((r) => (
-              <div
-                key={r.date}
-                title={`${r.date}: ${r.predicted_arrivals} expected`}
-                className="flex-1 rounded-t-[4px]"
-                style={{
-                  height: `${max ? Math.max(6, Math.round((r.predicted_arrivals / max) * 100)) : 6}%`,
-                  backgroundColor: r.date === peak?.date ? CHART.miniPeak : CHART.miniBar,
-                }}
-              />
-            ))}
-          </div>
-          {peak && (
-            <p className="mt-2 text-xs text-gray-500">
-              <span className="font-semibold text-gray-700">{weekday(peak.date)} peak: {peak.predicted_arrivals} expected</span>
-              <span className="block">Suggested capacity {peak.suggested_capacity}</span>
-            </p>
-          )}
-          <button
-            onClick={applySuggestion}
-            disabled={applying || !peak}
-            className="mt-3 w-full rounded-lg border border-leaf-600/40 px-3 py-1.5 text-sm font-medium text-leaf-700 hover:bg-leaf-50 disabled:opacity-40"
-          >
-            {applying ? "Applying…" : "Apply suggestion"}
-          </button>
-          {applyMsg && (
-            <p className={`mt-2 text-xs ${applyMsg.kind === "ok" ? "text-leaf-700" : "text-red-600"}`}>{applyMsg.text}</p>
-          )}
-        </>
-      )}
-      <Link href={`/admin/forecast?centre=${centreId}`} className="mt-3 block text-xs font-medium text-leaf-700 hover:underline">
-        Full forecast →
-      </Link>
-    </div>
-  );
-}
 
 export default function QueueBoard({
   centreId,
@@ -367,9 +264,6 @@ export default function QueueBoard({
               Bookings today: {s?.total ?? "…"} · Waiting: {s?.waiting ?? "…"}
             </p>
           </div>
-
-          {/* Arrivals forecast */}
-          <ForecastRailCard centreId={centreId} />
         </div>
       </div>
     </div>
