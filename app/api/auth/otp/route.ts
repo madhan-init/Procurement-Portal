@@ -31,7 +31,6 @@ export async function POST(req: Request) {
       farmer: { id: result.farmer.id, name: result.farmer.name, language: result.farmer.language },
       isNew: result.isNew,
     });
-    res.cookies.set("sih_lang", result.farmer.language, { path: "/", sameSite: "lax" });
     return res;
   }
 
