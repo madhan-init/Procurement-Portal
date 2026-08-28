@@ -18,10 +18,40 @@
   --color-wheat-700: #633806;
   --color-wheat-900: #412402;
   --color-page: #f6f7f2;
-  --font-sans: var(--font-noto), var(--font-noto-dev), ui-sans-serif, system-ui, sans-serif;
+  /* Outfit headings + DM Sans body — the polama.xyz pairing.
+     `font-sans` and `font-heading` utilities generate from these. */
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-outfit), var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* White is the farmer app's surface. --color-page (#F6F7F2) is still the
+   admin surface — both admin roots paint it themselves, so nothing here. */
 body {
-  background: var(--color-page);
+  background: #ffffff;
   color: #1f2937;
+}
+
+/* Headings run in Outfit project-wide. In @layer base so any explicit
+   font-* / tracking-* utility on a heading still wins. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Browser surfaces themed from the coral/ink palette */
+::selection {
+  background: #ffd9c7;
+  color: #111111;
+}
+input,
+textarea,
+select {
+  caret-color: #e8632a;
 }

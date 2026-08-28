@@ -3,18 +3,23 @@ import localFont from "next/font/local";
 import "./globals.css";
 
 // Committed woff2 files → the demo needs no network for fonts.
-// Same family across EN/HI so text doesn't jump on language switch.
-const notoSans = localFont({
-  src: "./fonts/noto-sans-latin.woff2",
-  weight: "400 900",
-  variable: "--font-noto",
+// Type pairing lifted from polama.xyz: Outfit for headings, DM Sans for
+// body/UI. Both are variable-weight latin subsets from Google Fonts (OFL),
+// so self-hosting them here is fine.
+const dmSans = localFont({
+  src: "./fonts/dm-sans-latin.woff2",
+  weight: "400 700",
+  variable: "--font-dm-sans",
   display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
-const notoDevanagari = localFont({
-  src: "./fonts/noto-sans-devanagari.woff2",
-  weight: "400 900",
-  variable: "--font-noto-dev",
+
+const outfit = localFont({
+  src: "./fonts/outfit-latin.woff2",
+  weight: "400 800",
+  variable: "--font-outfit",
   display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -26,8 +31,8 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${notoSans.variable} ${notoDevanagari.variable}`}>
-      <body className="min-h-screen bg-page font-sans text-gray-800 antialiased">{children}</body>
+    <html lang="en" className={`${dmSans.variable} ${outfit.variable}`}>
+      <body className="min-h-screen bg-white font-sans text-gray-800 antialiased">{children}</body>
     </html>
   );
 }
