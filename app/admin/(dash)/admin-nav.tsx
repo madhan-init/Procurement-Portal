@@ -23,7 +23,7 @@ export default function AdminNav({ centres }: { centres: { id: number; name: str
             key={t.href}
             href={`${t.href}?centre=${centre}`}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              pathname === t.href ? "bg-gray-900 text-white" : "text-gray-500 hover:bg-gray-100"
+              pathname === t.href ? "bg-leaf-600 text-white" : "text-gray-500 hover:bg-gray-100"
             }`}
           >
             {t.label}
@@ -33,7 +33,7 @@ export default function AdminNav({ centres }: { centres: { id: number; name: str
       <select
         value={centre}
         onChange={(e) => router.push(`${pathname}?centre=${e.target.value}`)}
-        className="rounded-lg border border-gray-200 px-2 py-1.5 text-sm"
+        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm"
       >
         {centres.map((c) => (
           <option key={c.id} value={c.id}>

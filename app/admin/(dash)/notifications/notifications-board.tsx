@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { IconSend } from "@/components/icons";
 
 type Row = { id: number; channel: string; message: string; sentAt: string; farmer: { name: string; phone: string } };
 
@@ -43,14 +44,14 @@ export default function NotificationsBoard({ centreId }: { centreId: number }) {
         <button
           onClick={sendReminders}
           disabled={busy}
-          className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+          className="flex items-center gap-2 rounded-xl bg-leaf-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-leaf-700 disabled:opacity-40"
         >
-          {busy ? "Sending…" : "📨 Send tomorrow's reminders"}
+          <IconSend size={16} /> {busy ? "Sending…" : "Send tomorrow's reminders"}
         </button>
       </div>
-      {toast && <p className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">{toast}</p>}
+      {toast && <p className="mt-3 rounded-lg bg-leaf-100 px-3 py-2 text-sm text-leaf-800">{toast}</p>}
 
-      <div className="mt-4 overflow-x-auto rounded-xl bg-white ring-1 ring-gray-100">
+      <div className="mt-4 overflow-x-auto rounded-xl bg-white ring-1 ring-gray-200/60">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-gray-100 text-xs uppercase text-gray-400">
             <tr>
@@ -76,7 +77,7 @@ export default function NotificationsBoard({ centreId }: { centreId: number }) {
                     <span className="block text-xs text-gray-400">{r.farmer.phone}</span>
                   </td>
                   <td className="px-4 py-2.5">
-                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">{r.channel}</span>
+                    <span className="rounded-full bg-[#E6F1FB] px-2 py-0.5 text-xs font-medium text-[#0C447C]">{r.channel}</span>
                   </td>
                   <td className="px-4 py-2.5 text-gray-600">{r.message}</td>
                 </tr>

@@ -57,7 +57,7 @@ export default function SlotsEditor({ centreId, dates }: { centreId: number; dat
             key={d}
             onClick={() => setDate(d)}
             className={`shrink-0 rounded-xl border px-3.5 py-2 text-sm font-medium ${
-              date === d ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-600"
+              date === d ? "border-leaf-600 bg-leaf-600 text-white" : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
             }`}
           >
             {i === 0 ? "Today" : i === 1 ? "Tomorrow" : d}
@@ -66,12 +66,12 @@ export default function SlotsEditor({ centreId, dates }: { centreId: number; dat
       </div>
 
       {msg && (
-        <p className={`mt-3 rounded-lg px-3 py-2 text-sm ${msg.kind === "ok" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
+        <p className={`mt-3 rounded-lg px-3 py-2 text-sm ${msg.kind === "ok" ? "bg-leaf-100 text-leaf-800" : "bg-red-50 text-red-600"}`}>
           {msg.text}
         </p>
       )}
 
-      <div className="mt-4 overflow-hidden rounded-xl bg-white ring-1 ring-gray-100">
+      <div className="mt-4 overflow-hidden rounded-xl bg-white ring-1 ring-gray-200/60">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-gray-100 text-xs uppercase text-gray-400">
             <tr>
@@ -106,7 +106,7 @@ export default function SlotsEditor({ centreId, dates }: { centreId: number; dat
                       <button
                         onClick={() => save(s.id)}
                         disabled={busy || Number(draft[s.id]) === s.capacity}
-                        className="rounded-lg bg-gray-900 px-3 py-1 text-xs font-medium text-white disabled:opacity-30"
+                        className="rounded-lg bg-leaf-600 px-3 py-1 text-xs font-medium text-white hover:bg-leaf-700 disabled:opacity-30"
                       >
                         Save
                       </button>

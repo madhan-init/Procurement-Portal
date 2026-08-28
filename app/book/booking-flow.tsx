@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { inr } from "@/lib/status-ui";
 import { t, type Lang } from "@/lib/i18n";
+import TokenSlip from "@/components/token-slip";
+import { IconRupee } from "@/components/icons";
 
 type Centre = { id: number; name: string; district: string };
 type Crop = { crop: string; ratePerQuintal: number; season: string };
@@ -21,6 +23,14 @@ function dateLabel(d: string, i: number, lang: Lang) {
   if (i === 0) return t(lang, "book.today");
   if (i === 1) return t(lang, "book.tomorrow");
   return new Date(`${d}T12:00:00+05:30`).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+}
+
+// Fullness pill per the mockup: green < 60%, wheat 60–84%, red ≥ 85%, gray when full.
+function pillClass(s: SlotInfo) {
+  if (s.full) return "bg-gray-100 text-gray-500";
+  if (s.pctFull >= 85) return "bg-[#FCEBEB] text-[#791F1F]";
+  if (s.pctFull >= 60) return "bg-wheat-50 text-wheat-700";
+  return "bg-leaf-100 text-leaf-800";
 }
 
 export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lang; centres: Centre[]; crops: Crop[]; dates: string[] }) {
@@ -75,26 +85,29 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
 
   if (done) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center p-6 text-center">
-        <div className="w-full rounded-3xl bg-green-800 p-8 text-white shadow-xl">
-          <div className="text-5xl">✅</div>
-          <p className="mt-4 text-sm uppercase tracking-widest text-green-200">{t(lang, "success.your_token")}</p>
-          <p className="text-7xl font-black">#{done.token}</p>
-          <p className="mt-4 font-medium">{done.centre}</p>
-          <p className="text-sm text-green-200">
-            {done.date} · {done.window}
-          </p>
-          <p className="mt-3 rounded-xl bg-green-900/60 px-3 py-2 text-sm">
-            {t(lang, "success.expected")} <b>{inr(done.amount)}</b>
-          </p>
-        </div>
+      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center p-6 text-[18px]">
+        <TokenSlip
+          size="lg"
+          heading={t(lang, "success.your_token")}
+          token={done.token}
+          line1={done.centre}
+          line2={`${done.date} · ${done.window}`}
+          footer={
+            <span className="flex items-center gap-2">
+              <IconRupee size={16} className="shrink-0" />
+              <span>
+                {t(lang, "success.expected")} <b className="text-wheat-900">{inr(done.amount)}</b>
+              </span>
+            </span>
+          }
+        />
         <Link
           href={`/bookings/${done.bookingId}`}
-          className="mt-6 w-full rounded-xl bg-green-700 py-3 font-semibold text-white"
+          className="mt-6 flex min-h-14 w-full items-center justify-center rounded-xl bg-leaf-600 font-semibold text-white hover:bg-leaf-700"
         >
           {t(lang, "success.track")}
         </Link>
-        <Link href="/" className="mt-3 text-sm text-gray-500">
+        <Link href="/" className="mt-4 text-center text-sm font-medium text-gray-500">
           {t(lang, "success.back")}
         </Link>
       </main>
@@ -102,9 +115,9 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-md p-5 pb-28">
+    <main className="mx-auto min-h-screen max-w-md p-5 pb-28 text-[18px]">
       <header className="mb-5 flex items-center gap-3">
-        <Link href="/" className="rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-500">
+        <Link href="/" className="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-sm text-gray-500">
           ←
         </Link>
         <h1 className="text-lg font-bold">{t(lang, "book.title")}</h1>
@@ -113,23 +126,20 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
       {/* Step 1 — centre */}
       <section>
         <h2 className="mb-2 text-sm font-semibold text-gray-500">{t(lang, "book.step_centre")}</h2>
-        <div className="space-y-2">
+        <select
+          className="h-14 w-full rounded-xl border border-gray-300 bg-white px-4 outline-none focus:border-leaf-600"
+          value={centre?.id ?? ""}
+          onChange={(e) => setCentre(centres.find((c) => c.id === Number(e.target.value)) ?? null)}
+        >
+          <option value="" disabled>
+            {t(lang, "book.pick_centre")}
+          </option>
           {centres.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setCentre(c)}
-              className={`flex w-full items-center justify-between rounded-xl border p-3.5 text-left ${
-                centre?.id === c.id ? "border-green-700 bg-green-50" : "border-gray-200 bg-white"
-              }`}
-            >
-              <span>
-                <span className="block font-medium">{c.name}</span>
-                <span className="text-xs text-gray-400">{c.district} {t(lang, "book.district")}</span>
-              </span>
-              {centre?.id === c.id && <span className="text-green-700">●</span>}
-            </button>
+            <option key={c.id} value={c.id}>
+              {c.name} — {c.district}
+            </option>
           ))}
-        </div>
+        </select>
       </section>
 
       {/* Step 2 — date */}
@@ -142,7 +152,7 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
                 key={d}
                 onClick={() => setDate(d)}
                 className={`shrink-0 rounded-xl border px-3.5 py-2 text-sm font-medium ${
-                  date === d ? "border-green-700 bg-green-700 text-white" : "border-gray-200 bg-white text-gray-600"
+                  date === d ? "border-leaf-600 bg-leaf-600 text-white" : "border-gray-200 bg-white text-gray-600"
                 }`}
               >
                 {dateLabel(d, i, lang)}
@@ -159,36 +169,42 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
           {!slots ? (
             <p className="text-sm text-gray-400">{t(lang, "book.loading_windows")}</p>
           ) : slots.length === 0 ? (
-            <p className="rounded-xl bg-white p-4 text-sm text-gray-400 ring-1 ring-gray-100">
+            <p className="rounded-xl bg-white p-4 text-sm text-gray-400 ring-1 ring-gray-200/60">
               {t(lang, "book.no_windows")}
             </p>
           ) : (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-2">
               {slots.map((s) => (
                 <button
                   key={s.id}
                   disabled={s.full}
                   onClick={() => setSlot(s)}
-                  className={`rounded-xl border p-3 text-center ${
+                  className={`w-full rounded-xl border p-4 text-left ${
                     s.full
                       ? "cursor-not-allowed border-gray-100 bg-gray-100 text-gray-400"
                       : slot?.id === s.id
-                        ? "border-green-700 bg-green-50"
+                        ? "border-leaf-600 bg-leaf-50"
                         : "border-gray-200 bg-white"
                   }`}
                 >
-                  <span className="block text-sm font-semibold">
-                    {s.windowStart}–{s.windowEnd}
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="font-semibold">
+                      {s.windowStart} – {s.windowEnd}
+                    </span>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${pillClass(s)}`}>
+                      {s.full ? t(lang, "book.full") : `${s.pctFull}${t(lang, "book.pct_full")}`}
+                    </span>
                   </span>
-                  <span className={`mt-1 block text-xs ${s.pctFull >= 80 ? "text-red-500" : "text-gray-400"}`}>
-                    {s.full ? t(lang, "book.full") : `${s.pctFull}${t(lang, "book.pct_full")}`}
-                  </span>
-                  <span className="mt-1 block h-1.5 w-full overflow-hidden rounded bg-gray-100">
-                    <span
-                      className={`block h-full ${s.pctFull >= 80 ? "bg-red-400" : "bg-green-500"}`}
-                      style={{ width: `${s.pctFull}%` }}
-                    />
-                  </span>
+                  {!s.full && (
+                    <span className="mt-2.5 block h-1.5 w-full overflow-hidden rounded bg-gray-100">
+                      <span
+                        className={`block h-full ${
+                          s.pctFull >= 85 ? "bg-[#B91C1C]" : s.pctFull >= 60 ? "bg-wheat-600" : "bg-leaf-600"
+                        }`}
+                        style={{ width: `${s.pctFull}%` }}
+                      />
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -200,9 +216,9 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
       {slot && (
         <section className="mt-6">
           <h2 className="mb-2 text-sm font-semibold text-gray-500">{t(lang, "book.step_crop")}</h2>
-          <div className="rounded-xl bg-white p-4 ring-1 ring-gray-100">
+          <div className="rounded-xl bg-white p-4 ring-1 ring-gray-200/60">
             <select
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
+              className="h-14 w-full rounded-xl border border-gray-300 bg-white px-4 outline-none focus:border-leaf-600"
               value={crop.crop}
               onChange={(e) => setCrop(crops.find((c) => c.crop === e.target.value) ?? crops[0])}
             >
@@ -218,12 +234,12 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
               step="0.5"
               inputMode="decimal"
               placeholder={t(lang, "book.qty_ph")}
-              className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2.5"
+              className="mt-3 h-14 w-full rounded-xl border border-gray-300 px-4 outline-none focus:border-leaf-600"
               value={qty}
               onChange={(e) => setQty(e.target.value)}
             />
             {Number(qty) > 0 && (
-              <p className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
+              <p className="mt-3 rounded-xl bg-leaf-50 px-4 py-3 text-sm text-leaf-800">
                 {t(lang, "book.expected")}: {qty} {t(lang, "track.qtl")} × {inr(crop.ratePerQuintal)} = <b>{inr(Number(qty) * crop.ratePerQuintal)}</b>
               </p>
             )}
@@ -231,16 +247,16 @@ export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lan
         </section>
       )}
 
-      {error && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-4 rounded-xl bg-[#FCEBEB] px-4 py-3 text-sm text-[#791F1F]">{error}</p>}
 
       {slot && Number(qty) > 0 && (
-        <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-gradient-to-t from-gray-50 via-gray-50 p-4">
+        <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-gradient-to-t from-page via-page p-4">
           <button
             onClick={confirm}
             disabled={busy}
-            className="w-full rounded-xl bg-green-700 py-3.5 font-semibold text-white shadow-lg disabled:opacity-50"
+            className="min-h-14 w-full rounded-xl bg-leaf-600 font-semibold text-white shadow-lg hover:bg-leaf-700 disabled:opacity-50"
           >
-            {busy ? t(lang, "book.booking") : `${t(lang, "book.confirm")} · ${dateLabel(date, dates.indexOf(date), lang)} ${slot.windowStart}`}
+            {busy ? t(lang, "book.booking") : t(lang, "book.confirm")}
           </button>
         </div>
       )}

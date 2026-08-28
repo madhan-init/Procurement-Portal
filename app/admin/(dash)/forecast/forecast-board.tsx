@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { CHART } from "@/lib/status-ui";
 
 type Row = {
   date: string;
@@ -100,7 +101,7 @@ export default function ForecastBoard({ centreId }: { centreId: number }) {
         <button
           onClick={applyAll}
           disabled={!data || busyDate !== null}
-          className="rounded-xl bg-green-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+          className="rounded-xl bg-leaf-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-leaf-700 disabled:opacity-40"
         >
           {busyDate === "all" ? "Applying…" : "⚡ Apply suggested capacity (all days)"}
         </button>
@@ -109,7 +110,7 @@ export default function ForecastBoard({ centreId }: { centreId: number }) {
       {error && (
         <div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-100">{error}</div>
       )}
-      {toast && <p className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">{toast}</p>}
+      {toast && <p className="mt-3 rounded-lg bg-leaf-100 px-3 py-2 text-sm text-leaf-800">{toast}</p>}
 
       {/* Model quality card */}
       {m && (
@@ -122,9 +123,9 @@ export default function ForecastBoard({ centreId }: { centreId: number }) {
             <p className="text-2xl font-black text-gray-400">±{m.baseline_mae}</p>
             <p className="mt-0.5 text-xs text-gray-400">Seasonal-naive baseline MAE</p>
           </div>
-          <div className="rounded-xl bg-green-50 p-4 ring-1 ring-green-100">
-            <p className="text-2xl font-black text-green-700">{m.improvement_pct}%</p>
-            <p className="mt-0.5 text-xs text-green-700/70">better than baseline</p>
+          <div className="rounded-xl bg-leaf-100 p-4">
+            <p className="text-2xl font-black text-leaf-800">{m.improvement_pct}%</p>
+            <p className="mt-0.5 text-xs text-leaf-800/70">better than baseline</p>
           </div>
           <div className="rounded-xl bg-white p-4 ring-1 ring-gray-100">
             <p className="text-2xl font-black">{m.holdout_days}d</p>
@@ -144,12 +145,12 @@ export default function ForecastBoard({ centreId }: { centreId: number }) {
                 <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="predicted_arrivals" name="Forecast arrivals" fill="#15803d" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="booked" name="Booked so far" fill="#9ca3af" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="predicted_arrivals" name="Forecast arrivals" fill={CHART.forecast} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="booked" name="Booked so far" fill={CHART.booked} radius={[4, 4, 0, 0]} />
                 <Line
                   dataKey="suggested_capacity"
                   name="Suggested capacity"
-                  stroke="#d97706"
+                  stroke={CHART.suggested}
                   strokeDasharray="6 3"
                   strokeWidth={2}
                   dot={{ r: 3 }}
@@ -188,7 +189,7 @@ export default function ForecastBoard({ centreId }: { centreId: number }) {
                     <button
                       onClick={() => apply(r.date, r.suggested_capacity)}
                       disabled={busyDate !== null}
-                      className="rounded-lg bg-gray-900 px-3 py-1 text-xs font-medium text-white disabled:opacity-30"
+                      className="rounded-lg bg-leaf-600 px-3 py-1 text-xs font-medium text-white hover:bg-leaf-700 disabled:opacity-30"
                     >
                       {busyDate === r.date ? "…" : "Apply"}
                     </button>
