@@ -27,10 +27,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
     await setFarmerSession(result.farmer.id);
-    return NextResponse.json({
+    const res = NextResponse.json({
       farmer: { id: result.farmer.id, name: result.farmer.name, language: result.farmer.language },
       isNew: result.isNew,
     });
+    res.cookies.set("sih_lang", result.farmer.language, { path: "/", sameSite: "lax" });
+    return res;
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });

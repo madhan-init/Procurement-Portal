@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getFarmerId } from "@/lib/session";
 import { getQueueStatus } from "@/lib/services/queue";
 import Tracker from "./tracker";
+import { getLang } from "@/lib/lang";
 
 export const dynamic = "force-dynamic";
 
@@ -20,5 +21,5 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
   if (!booking || booking.farmerId !== farmerId) notFound();
 
   const queue = await getQueueStatus(booking.id);
-  return <Tracker initial={JSON.parse(JSON.stringify({ booking, queue }))} />;
+  return <Tracker lang={await getLang()} initial={JSON.parse(JSON.stringify({ booking, queue }))} />;
 }

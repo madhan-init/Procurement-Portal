@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getFarmerId } from "@/lib/session";
 import { istToday } from "@/lib/dates";
 import BookingFlow from "./booking-flow";
+import { getLang } from "@/lib/lang";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,10 @@ export default async function BookPage() {
   ]);
   const dates = Array.from({ length: 7 }, (_, i) => istToday(i));
 
+  const lang = await getLang();
   return (
     <BookingFlow
+      lang={lang}
       centres={centres.map((c) => ({ id: c.id, name: c.name, district: c.district }))}
       crops={crops.map((c) => ({ crop: c.crop, ratePerQuintal: c.ratePerQuintal, season: c.season }))}
       dates={dates}

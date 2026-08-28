@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { inr } from "@/lib/status-ui";
+import { t, type Lang } from "@/lib/i18n";
 
 type Centre = { id: number; name: string; district: string };
 type Crop = { crop: string; ratePerQuintal: number; season: string };
@@ -16,13 +17,13 @@ type SlotInfo = {
 };
 type Success = { bookingId: number; token: number; date: string; window: string; centre: string; amount: number };
 
-function dateLabel(d: string, i: number) {
-  if (i === 0) return "Today";
-  if (i === 1) return "Tomorrow";
+function dateLabel(d: string, i: number, lang: Lang) {
+  if (i === 0) return t(lang, "book.today");
+  if (i === 1) return t(lang, "book.tomorrow");
   return new Date(`${d}T12:00:00+05:30`).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
 }
 
-export default function BookingFlow({ centres, crops, dates }: { centres: Centre[]; crops: Crop[]; dates: string[] }) {
+export default function BookingFlow({ lang, centres, crops, dates }: { lang: Lang; centres: Centre[]; crops: Crop[]; dates: string[] }) {
   const [centre, setCentre] = useState<Centre | null>(null);
   const [date, setDate] = useState<string>(dates[0]);
   const [slots, setSlots] = useState<SlotInfo[] | null>(null);
@@ -77,24 +78,24 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center p-6 text-center">
         <div className="w-full rounded-3xl bg-green-800 p-8 text-white shadow-xl">
           <div className="text-5xl">✅</div>
-          <p className="mt-4 text-sm uppercase tracking-widest text-green-200">Your token</p>
+          <p className="mt-4 text-sm uppercase tracking-widest text-green-200">{t(lang, "success.your_token")}</p>
           <p className="text-7xl font-black">#{done.token}</p>
           <p className="mt-4 font-medium">{done.centre}</p>
           <p className="text-sm text-green-200">
             {done.date} · {done.window}
           </p>
           <p className="mt-3 rounded-xl bg-green-900/60 px-3 py-2 text-sm">
-            Expected payment <b>{inr(done.amount)}</b>
+            {t(lang, "success.expected")} <b>{inr(done.amount)}</b>
           </p>
         </div>
         <Link
           href={`/bookings/${done.bookingId}`}
           className="mt-6 w-full rounded-xl bg-green-700 py-3 font-semibold text-white"
         >
-          Track live queue →
+          {t(lang, "success.track")}
         </Link>
         <Link href="/" className="mt-3 text-sm text-gray-500">
-          Back to home
+          {t(lang, "success.back")}
         </Link>
       </main>
     );
@@ -106,12 +107,12 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
         <Link href="/" className="rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-500">
           ←
         </Link>
-        <h1 className="text-lg font-bold">Book a slot</h1>
+        <h1 className="text-lg font-bold">{t(lang, "book.title")}</h1>
       </header>
 
       {/* Step 1 — centre */}
       <section>
-        <h2 className="mb-2 text-sm font-semibold text-gray-500">1 · Procurement centre</h2>
+        <h2 className="mb-2 text-sm font-semibold text-gray-500">{t(lang, "book.step_centre")}</h2>
         <div className="space-y-2">
           {centres.map((c) => (
             <button
@@ -123,7 +124,7 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
             >
               <span>
                 <span className="block font-medium">{c.name}</span>
-                <span className="text-xs text-gray-400">{c.district} district</span>
+                <span className="text-xs text-gray-400">{c.district} {t(lang, "book.district")}</span>
               </span>
               {centre?.id === c.id && <span className="text-green-700">●</span>}
             </button>
@@ -134,7 +135,7 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
       {/* Step 2 — date */}
       {centre && (
         <section className="mt-6">
-          <h2 className="mb-2 text-sm font-semibold text-gray-500">2 · Date</h2>
+          <h2 className="mb-2 text-sm font-semibold text-gray-500">{t(lang, "book.step_date")}</h2>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {dates.map((d, i) => (
               <button
@@ -144,7 +145,7 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
                   date === d ? "border-green-700 bg-green-700 text-white" : "border-gray-200 bg-white text-gray-600"
                 }`}
               >
-                {dateLabel(d, i)}
+                {dateLabel(d, i, lang)}
               </button>
             ))}
           </div>
@@ -154,12 +155,12 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
       {/* Step 3 — window */}
       {centre && (
         <section className="mt-6">
-          <h2 className="mb-2 text-sm font-semibold text-gray-500">3 · Time window</h2>
+          <h2 className="mb-2 text-sm font-semibold text-gray-500">{t(lang, "book.step_window")}</h2>
           {!slots ? (
-            <p className="text-sm text-gray-400">Loading windows…</p>
+            <p className="text-sm text-gray-400">{t(lang, "book.loading_windows")}</p>
           ) : slots.length === 0 ? (
             <p className="rounded-xl bg-white p-4 text-sm text-gray-400 ring-1 ring-gray-100">
-              No windows published for this date yet.
+              {t(lang, "book.no_windows")}
             </p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
@@ -180,7 +181,7 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
                     {s.windowStart}–{s.windowEnd}
                   </span>
                   <span className={`mt-1 block text-xs ${s.pctFull >= 80 ? "text-red-500" : "text-gray-400"}`}>
-                    {s.full ? "Full" : `${s.pctFull}% full`}
+                    {s.full ? t(lang, "book.full") : `${s.pctFull}${t(lang, "book.pct_full")}`}
                   </span>
                   <span className="mt-1 block h-1.5 w-full overflow-hidden rounded bg-gray-100">
                     <span
@@ -198,7 +199,7 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
       {/* Step 4 — crop & quantity */}
       {slot && (
         <section className="mt-6">
-          <h2 className="mb-2 text-sm font-semibold text-gray-500">4 · Crop & quantity</h2>
+          <h2 className="mb-2 text-sm font-semibold text-gray-500">{t(lang, "book.step_crop")}</h2>
           <div className="rounded-xl bg-white p-4 ring-1 ring-gray-100">
             <select
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
@@ -216,14 +217,14 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
               min="0.5"
               step="0.5"
               inputMode="decimal"
-              placeholder="Quantity in quintals"
+              placeholder={t(lang, "book.qty_ph")}
               className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2.5"
               value={qty}
               onChange={(e) => setQty(e.target.value)}
             />
             {Number(qty) > 0 && (
               <p className="mt-3 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
-                Expected payment: {qty} qtl × {inr(crop.ratePerQuintal)} = <b>{inr(Number(qty) * crop.ratePerQuintal)}</b>
+                {t(lang, "book.expected")}: {qty} {t(lang, "track.qtl")} × {inr(crop.ratePerQuintal)} = <b>{inr(Number(qty) * crop.ratePerQuintal)}</b>
               </p>
             )}
           </div>
@@ -239,7 +240,7 @@ export default function BookingFlow({ centres, crops, dates }: { centres: Centre
             disabled={busy}
             className="w-full rounded-xl bg-green-700 py-3.5 font-semibold text-white shadow-lg disabled:opacity-50"
           >
-            {busy ? "Booking…" : `Confirm booking · ${dateLabel(date, dates.indexOf(date))} ${slot.windowStart}`}
+            {busy ? t(lang, "book.booking") : `${t(lang, "book.confirm")} · ${dateLabel(date, dates.indexOf(date), lang)} ${slot.windowStart}`}
           </button>
         </div>
       )}

@@ -16,7 +16,7 @@ type Row = {
 type QueueData = {
   date: string;
   rows: Row[];
-  summary: { total: number; waiting: number; nowServing: number; paid: number; noShows: number };
+  summary: { total: number; waiting: number; nowServing: number; paid: number; noShows: number; avgWaitMin: number | null; measuredServiceMin: number | null };
 };
 
 const NEXT_LABEL: Record<string, string> = {
@@ -103,13 +103,15 @@ export default function QueueBoard({
       </div>
 
       {/* Summary tiles */}
-      <div className="mt-4 grid grid-cols-5 gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-7">
         {[
           { label: "Now serving", value: s?.nowServing ? `#${s.nowServing}` : "—" },
           { label: "Waiting", value: s?.waiting ?? "…" },
           { label: "Bookings today", value: s?.total ?? "…" },
           { label: "Paid", value: s?.paid ?? "…" },
           { label: "No-shows", value: s?.noShows ?? "…" },
+          { label: "Avg wait today (measured)", value: s?.avgWaitMin != null ? `${s.avgWaitMin} min` : "—" },
+          { label: "Service/farmer (measured)", value: s?.measuredServiceMin != null ? `${s.measuredServiceMin} min` : "—" },
         ].map((t) => (
           <div key={t.label} className="rounded-xl bg-white p-4 ring-1 ring-gray-100">
             <p className="text-2xl font-black">{t.value}</p>
