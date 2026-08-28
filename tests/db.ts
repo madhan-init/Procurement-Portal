@@ -10,7 +10,7 @@ const template = path.resolve(process.cwd(), "prisma", "test-template.db");
 export function testDb() {
   const file = path.resolve(process.cwd(), "prisma", `test-${crypto.randomUUID()}.db`);
   fs.copyFileSync(template, file);
-  const prisma = new PrismaClient({ datasources: { db: { url: `file:${file}` } } });
+  const prisma = new PrismaClient({ datasources: { db: { url: `file:${file}?connection_limit=1&socket_timeout=30` } } });
   return {
     prisma,
     async cleanup() {
