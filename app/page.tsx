@@ -4,12 +4,13 @@ import { prisma } from "@/lib/db";
 import { getFarmerId } from "@/lib/session";
 import { getQueueStatus } from "@/lib/services/queue";
 import { istToday } from "@/lib/dates";
-import { STATUS_BADGE, inr } from "@/lib/status-ui";
+import { inr } from "@/lib/status-ui";
 import { getLang } from "@/lib/lang";
 import { t, type I18nKey } from "@/lib/i18n";
-import LangToggle from "@/components/lang-toggle";
-import TokenSlip from "@/components/token-slip";
-import { IconCalendarPlus, IconClock, IconRupee, IconTrack, IconWheat } from "@/components/icons";
+import BrandMark from "@/components/brand-mark";
+import TokenCard from "@/components/token-card";
+import { IconCalendarPlus, IconClock, IconRupee, IconTrack } from "@/components/icons";
+import { COLUMN, COMMIT, FOOTNOTE, GHOST, H1, HEADER, SHELL, SUB } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -46,97 +47,102 @@ export default async function HomePage() {
   const queue = waiting ? await getQueueStatus(booking.id) : null;
 
   return (
-    <main className="mx-auto min-h-screen max-w-md p-5 pb-24 text-[18px]">
-      <header className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2 rounded-lg bg-leaf-600 px-3 py-2 text-white">
-          <IconWheat size={18} />
-          <span className="text-sm font-bold">{t(lang, "app.brand")}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <LangToggle lang={lang} />
-          <form action="/api/auth/logout" method="post">
-            <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-500">
-              {t(lang, "home.logout")}
-            </button>
-          </form>
-        </div>
+    <main className={SHELL}>
+      <header className={HEADER}>
+        <BrandMark lang={lang} />
+        <form action="/api/auth/logout" method="post">
+          <button className="shrink-0 text-[15px] font-medium text-[#6B7280] underline-offset-4 transition-colors hover:text-[#111111] hover:underline">
+            {t(lang, "home.logout")}
+          </button>
+        </form>
       </header>
 
-      <div className="mb-5">
-        <p className="text-sm text-gray-500">{t(lang, "home.namaste")}</p>
-        <h1 className="text-xl font-bold leading-tight">{farmer.name}</h1>
-        <p className="text-sm text-gray-400">{farmer.village}</p>
-      </div>
+      <div className="flex justify-center px-6 pb-20 pt-10">
+        <div className={COLUMN}>
+          <p className="text-center text-[15px] text-[#6B7280]">{t(lang, "home.namaste")}</p>
+          <h1 className={`mt-1 ${H1}`}>{farmer.name}</h1>
+          <p className={SUB}>{farmer.village}</p>
 
-      {booking ? (
-        <>
-          <Link href={`/bookings/${booking.id}`} className="block">
-            <TokenSlip
-              heading={
-                booking.date === today
-                  ? t(lang, "home.your_token_today")
-                  : `${t(lang, "home.your_token_on")} · ${booking.date}`
-              }
-              token={booking.tokenNumber}
-              line1={`${booking.centre.name} · ${booking.slot.windowStart}–${booking.slot.windowEnd}`}
-              footer={
-                queue ? (
-                  <span className="flex items-center gap-2">
-                    <IconClock size={16} className="shrink-0" />
-                    <span>
-                      {t(lang, "track.now_serving")} #{queue.nowServing || "—"} · {t(lang, "track.est_wait")} ~
-                      {queue.etaMinutes} {t(lang, "track.min")}
-                    </span>
+          <div className="mt-8">
+            {booking ? (
+              <>
+                <TokenCard
+                  href={`/bookings/${booking.id}`}
+                  heading={
+                    booking.date === today
+                      ? t(lang, "home.your_token_today")
+                      : `${t(lang, "home.your_token_on")} · ${booking.date}`
+                  }
+                  token={booking.tokenNumber}
+                  line1={booking.centre.name}
+                  line2={`${booking.slot.windowStart}–${booking.slot.windowEnd}`}
+                  footer={
+                    queue ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <IconClock size={16} className="shrink-0" />
+                        <span>
+                          {t(lang, "track.now_serving")} #{queue.nowServing || "—"} ·{" "}
+                          {t(lang, "track.est_wait")} ~{queue.etaMinutes} {t(lang, "track.min")}
+                        </span>
+                      </span>
+                    ) : undefined
+                  }
+                />
+                <div className="mt-3 flex items-center justify-between gap-3 text-[15px] text-[#6B7280]">
+                  <span className="truncate">
+                    {booking.crop} · {booking.quantityQuintals} {t(lang, "track.qtl")} ·{" "}
+                    {inr(booking.amountPayable)}
                   </span>
-                ) : undefined
-              }
-            />
-          </Link>
-          <div className="mt-3 flex items-center justify-between gap-2 px-1 text-sm text-gray-500">
-            <span className="truncate">
-              {booking.crop} · {booking.quantityQuintals} {t(lang, "track.qtl")} · {inr(booking.amountPayable)}
-            </span>
-            <span
-              className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[booking.status as keyof typeof STATUS_BADGE]}`}
-            >
-              {STATUS_KEY[booking.status] ? t(lang, STATUS_KEY[booking.status]) : booking.status}
-            </span>
+                  {/* One status, not a list to scan — a quiet chip beats importing
+                      the colour-coded STATUS_BADGE palette onto this screen. */}
+                  <span className="shrink-0 rounded-full bg-[#F4F4F5] px-2.5 py-1 text-[12px] font-bold text-[#6B7280]">
+                    {STATUS_KEY[booking.status] ? t(lang, STATUS_KEY[booking.status]) : booking.status}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="rounded-xl border border-[#E4E4E7] bg-white p-8 text-center">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FFF1EB] text-[#E8632A]">
+                  <IconCalendarPlus size={26} />
+                </span>
+                <p className="mt-4 text-[17px] font-semibold text-[#111111]">
+                  {t(lang, "home.no_booking")}
+                </p>
+                <p className="mt-1 text-[15px] text-[#6B7280]">{t(lang, "home.no_booking_hint")}</p>
+              </div>
+            )}
           </div>
-        </>
-      ) : (
-        <div className="rounded-xl bg-white p-8 text-center ring-1 ring-gray-200/60">
-          <div className="text-4xl">🚜</div>
-          <p className="mt-3 font-medium text-gray-700">{t(lang, "home.no_booking")}</p>
-          <p className="mt-1 text-sm text-gray-400">{t(lang, "home.no_booking_hint")}</p>
+
+          <Link href="/book" className={`mt-6 gap-2 ${COMMIT}`}>
+            <IconCalendarPlus size={20} />
+            {t(lang, "home.book_slot")}
+          </Link>
+          <p className="mt-3 text-center text-[15px] text-[#6B7280]">{t(lang, "home.pick_hint")}</p>
+
+          <div
+            className={`mt-5 grid grid-cols-2 gap-3 ${booking ? "" : "pointer-events-none opacity-40"}`}
+            aria-disabled={!booking}
+          >
+            <Link
+              href={booking ? `/bookings/${booking.id}` : "#"}
+              tabIndex={booking ? undefined : -1}
+              className={`gap-2 ${GHOST}`}
+            >
+              <IconTrack size={18} className="text-[#E8632A]" />
+              {t(lang, "home.track_status")}
+            </Link>
+            <Link
+              href={booking ? `/bookings/${booking.id}#payment` : "#"}
+              tabIndex={booking ? undefined : -1}
+              className={`gap-2 ${GHOST}`}
+            >
+              <IconRupee size={18} className="text-[#E8632A]" />
+              {t(lang, "home.payments")}
+            </Link>
+          </div>
+
+          <p className={`mt-8 ${FOOTNOTE}`}>{t(lang, "login.footer")}</p>
         </div>
-      )}
-
-      <Link
-        href="/book"
-        className="mt-6 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-leaf-600 font-semibold text-white shadow-sm hover:bg-leaf-700"
-      >
-        <IconCalendarPlus size={20} />
-        {t(lang, "home.book_slot").replace("＋ ", "")}
-      </Link>
-      <p className="mt-2 text-center text-sm text-gray-400">{t(lang, "home.pick_hint")}</p>
-
-      <div className={`mt-4 grid grid-cols-2 gap-3 ${booking ? "" : "pointer-events-none opacity-40"}`} aria-disabled={!booking}>
-        <Link
-          href={booking ? `/bookings/${booking.id}` : "#"}
-          tabIndex={booking ? undefined : -1}
-          className="flex min-h-14 items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-gray-700 ring-1 ring-gray-200/60"
-        >
-          <IconTrack size={18} className="text-leaf-600" />
-          {t(lang, "home.track_status")}
-        </Link>
-        <Link
-          href={booking ? `/bookings/${booking.id}#payment` : "#"}
-          tabIndex={booking ? undefined : -1}
-          className="flex min-h-14 items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-gray-700 ring-1 ring-gray-200/60"
-        >
-          <IconRupee size={18} className="text-leaf-600" />
-          {t(lang, "home.payments")}
-        </Link>
       </div>
     </main>
   );
