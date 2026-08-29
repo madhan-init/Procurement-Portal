@@ -49,3 +49,42 @@ export const COLUMN = "w-full max-w-[456px]";
 export const H1 =
   "text-center text-[34px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111111]";
 export const SUB = "mt-2 text-center text-[17px] text-[#6B7280]";
+
+/* ── Dense surfaces (admin) ───────────────────────────────────
+   Same palette, radius, and type as the farmer screens — just a
+   compact footprint. The full-height COMMIT/GHOST/FIELD above are
+   for one-action-per-screen columns; these are for toolbars,
+   table rows and sticky bars.
+   ─────────────────────────────────────────────────────────── */
+export const CARD = "rounded-xl border border-[#E4E4E7] bg-white";
+
+/** 40px coral action. */
+export const COMMIT_SM =
+  "inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#FB8A61] px-4 text-[15px] font-semibold text-white transition-colors hover:bg-[#F5794A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E8632A] disabled:cursor-not-allowed disabled:opacity-40";
+/** 40px secondary action. */
+export const GHOST_SM =
+  "inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white px-4 text-[15px] font-semibold text-[#111111] transition-colors hover:bg-[#FAFAFA] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FB8A61] disabled:cursor-not-allowed disabled:opacity-40";
+/** In-row coral action. */
+export const COMMIT_XS =
+  "inline-flex h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-[#FB8A61] px-3 text-[13px] font-semibold text-white transition-colors hover:bg-[#F5794A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E8632A] disabled:cursor-not-allowed disabled:opacity-40";
+/** In-row text action; pass a colour class for danger. */
+export const LINK_XS =
+  "whitespace-nowrap text-[13px] font-medium underline-offset-2 transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-40";
+
+/** 40px field, for toolbars and table cells. */
+export const FIELD_SM =
+  "h-10 rounded-xl border border-[#E4E4E7] bg-white px-3 text-[15px] text-[#111111] outline-none transition-colors focus:border-[#FB8A61] focus:ring-4 focus:ring-[#FB8A61]/15";
+
+export const TABLE = "w-full text-left text-[14px]";
+export const THEAD = "border-b border-[#E4E4E7]";
+export const TH = "px-4 py-3 text-[12px] font-bold uppercase tracking-[0.06em] text-[#A0A3A8]";
+export const TR = "border-b border-[#EFEFF1] last:border-0";
+export const TD = "px-4 py-3";
+
+/** Page heading for dense screens — left-aligned, smaller than H1. */
+export const H2_PAGE = "text-[26px] font-bold tracking-[-0.02em] text-[#111111]";
+export const NOTE = "mt-1 text-[15px] text-[#6B7280]";
+
+/** Feedback strips. */
+export const TOAST_OK = "mt-3 rounded-xl bg-[#FFF1EB] px-4 py-2.5 text-[15px] text-[#C2521E]";
+export const TOAST_ERR = "mt-3 rounded-xl bg-[#FEF1F1] px-4 py-2.5 text-[15px] text-[#B4383C]";
