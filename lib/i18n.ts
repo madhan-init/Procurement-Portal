@@ -2,7 +2,7 @@
 export const dict = {
   en: {
     "app.title": "MSP Procurement",
-    "app.brand": "Mandi Mitra",
+    "app.brand": "Procurement Portal",
     "app.tagline": "Book your slot. Skip the queue.",
     "home.namaste": "Namaste!",
     "home.logout": "Logout",
@@ -101,7 +101,7 @@ export const dict = {
   },
   hi: {
     "app.title": "एमएसपी खरीद",
-    "app.brand": "मंडी मित्र",
+    "app.brand": "खरीद पोर्टल",
     "app.tagline": "स्लॉट बुक करें। कतार छोड़ें।",
     "home.namaste": "नमस्ते 🙏",
     "home.logout": "लॉगआउट",

@@ -1,6 +1,6 @@
 "use client";
 /* ─────────────────────────────────────────────────────────
-   Mandi Mitra — mobile + OTP login
+   Procurement Portal — mobile + OTP login
    Layout adapted from the supplied Optiflow reference: white page,
    brand mark top-left, one centred column, coral commit button.
    Class tokens and the palette live in lib/ui — shared with the

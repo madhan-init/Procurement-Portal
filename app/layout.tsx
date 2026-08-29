@@ -23,7 +23,7 @@ const outfit = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Mandi Mitra · MSP Procurement",
+  title: "Procurement Portal",
   description: "SIH 2026 PS 26032 — farmer procurement slot booking & queue management",
 };
 

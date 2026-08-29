@@ -36,7 +36,7 @@ Not a generic booking form: a queue-management system with a per-centre arrival 
 
 ## Brand Commitments
 
-- Product name (confirmed, binding): **Mandi Mitra** (hi: मंडी मित्र). "MSP procurement slot booking" is the descriptor, not the title.
+- Product name (confirmed, binding): **Procurement Portal** (hi: खरीद पोर्टल). Prior names: Mandi Mitra, Agri-Portal.
 - Visual world (user-pinned via approved mockup, binding): leaf green #3B6D11 primary; wheat token-slip family #FAEEDA/#854F0B/#412402; page #F6F7F2; white cards; 12px radius; status-chip palette as implemented in lib/status-ui.ts; Noto Sans + Noto Sans Devanagari (local, committed); signature element: the paper "parchi" token slip with dashed tear-line (components/token-slip.tsx).
 - Tone: friendly-official; plain language; no hype.
 
