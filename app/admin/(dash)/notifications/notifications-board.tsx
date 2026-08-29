@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { IconSend } from "@/components/icons";
+import { CARD, COMMIT_SM, H2_PAGE, NOTE, TABLE, TD, TH, THEAD, TOAST_OK, TR } from "@/lib/ui";
 
 type Row = { id: number; channel: string; message: string; sentAt: string; farmer: { name: string; phone: string } };
 
@@ -38,48 +39,48 @@ export default function NotificationsBoard({ centreId }: { centreId: number }) {
     <div>
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-xl font-bold">Notification log</h1>
-          <p className="text-sm text-gray-400">Every SMS the platform has sent (mock gateway) · refreshes every 10 s</p>
+          <h1 className={H2_PAGE}>Notification log</h1>
+          <p className={NOTE}>Every SMS the platform has sent (mock gateway) · refreshes every 10 s</p>
         </div>
         <button
           onClick={sendReminders}
           disabled={busy}
-          className="flex items-center gap-2 rounded-xl bg-leaf-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-leaf-700 disabled:opacity-40"
+          className={COMMIT_SM}
         >
           <IconSend size={16} /> {busy ? "Sending…" : "Send tomorrow's reminders"}
         </button>
       </div>
-      {toast && <p className="mt-3 rounded-lg bg-leaf-100 px-3 py-2 text-sm text-leaf-800">{toast}</p>}
+      {toast && <p className={TOAST_OK}>{toast}</p>}
 
-      <div className="mt-4 overflow-x-auto rounded-xl bg-white ring-1 ring-gray-200/60">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-100 text-xs uppercase text-gray-400">
+      <div className={`mt-4 overflow-x-auto ${CARD}`}>
+        <table className={TABLE}>
+          <thead className={THEAD}>
             <tr>
-              <th className="px-4 py-3">Time</th>
-              <th className="px-4 py-3">To</th>
-              <th className="px-4 py-3">Channel</th>
-              <th className="px-4 py-3">Message</th>
+              <th className={TH}>Time</th>
+              <th className={TH}>To</th>
+              <th className={TH}>Channel</th>
+              <th className={TH}>Message</th>
             </tr>
           </thead>
           <tbody>
             {!rows ? (
-              <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">Loading…</td></tr>
+              <tr><td colSpan={4} className="px-4 py-10 text-center text-[15px] text-[#A0A3A8]">Loading…</td></tr>
             ) : rows.length === 0 ? (
-              <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">No messages sent yet.</td></tr>
+              <tr><td colSpan={4} className="px-4 py-10 text-center text-[15px] text-[#A0A3A8]">No messages sent yet.</td></tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.id} className="border-b border-gray-50 align-top last:border-0">
-                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-gray-400">
+                <tr key={r.id} className={`${TR} align-top`}>
+                  <td className={`${TD} whitespace-nowrap text-[13px] text-[#A0A3A8]`}>
                     {new Date(r.sentAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-2.5">
-                    <span className="font-medium">{r.farmer.name}</span>
-                    <span className="block text-xs text-gray-400">{r.farmer.phone}</span>
+                  <td className={`${TD} whitespace-nowrap`}>
+                    <span className="font-medium text-[#111111]">{r.farmer.name}</span>
+                    <span className="block text-[13px] text-[#A0A3A8]">{r.farmer.phone}</span>
                   </td>
-                  <td className="px-4 py-2.5">
-                    <span className="rounded-full bg-[#E6F1FB] px-2 py-0.5 text-xs font-medium text-[#0C447C]">{r.channel}</span>
+                  <td className={TD}>
+                    <span className="inline-block rounded-full bg-[#F4F4F5] px-2.5 py-1 text-[12px] font-bold text-[#6B7280]">{r.channel}</span>
                   </td>
-                  <td className="px-4 py-2.5 text-gray-600">{r.message}</td>
+                  <td className={`${TD} text-[#6B7280]`}>{r.message}</td>
                 </tr>
               ))
             )}
