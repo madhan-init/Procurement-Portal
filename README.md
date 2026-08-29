@@ -1,69 +1,189 @@
-# MSP Procurement Slot Booking & Queue Management
+# Procurement Portal
 
-**SIH 2026 · PS 26032 · Ministry of Consumer Affairs, Food & PD (DoCA)**
+**MSP procurement slot booking and queue management**
+Smart India Hackathon 2026 · Problem Statement 26032 · Department of Consumer Affairs, Food & Public Distribution
 
-Farmers at government procurement centres wait in unmanaged queues with no visibility into schedules, procurement, or payment. This platform gives them **phone-OTP registration, slot booking with live capacity, a token, a live queue tracker (now-serving / position / ETA), SMS notifications at every step, and payment tracking at MSP rates** — plus an **admin dashboard** for centre staff.
+A farmer who brings paddy or wheat to a government procurement centre today joins an
+unmanaged line. He does not know when his turn will come, whether the centre will still
+have capacity when it does, or what happened to his crop after it was weighed. Centre
+staff have the mirror problem: 200 farmers on one day and 40 on the next, with no way to
+plan either.
 
-Everything runs **fully offline on one laptop**: Next.js + SQLite. SMS is mocked into a visible notification log (Twilio slots in behind a flag).
+This project replaces the physical line with a booked time window, a numbered token, a
+live queue position, and an SMS at every step through payment. Staff get a dashboard to
+call the next token, move bookings down the pipeline, mark no-shows, and change how many
+farmers each window can take.
 
-## Quick start (3 terminals)
+The whole system runs offline on a single laptop. Next.js serves both surfaces, SQLite
+holds the data, and SMS is written to a notification log that is visible on screen. No
+cloud account or API key is needed to run it.
+
+## What it does
+
+For the farmer, on a phone:
+
+- Log in with a phone number and OTP. An unknown number registers in the same flow (name, village, language).
+- Book a slot: centre, date within the next seven days, one of three daily windows, crop and quantity. Each window shows how full it already is.
+- Get a token slip with the token number and the amount to expect, calculated as declared quantity times the notified MSP rate for that crop.
+- Track the queue: now serving, position in line, estimated wait. The screen refreshes every ten seconds.
+- Receive an SMS on booking, on the day-before reminder that staff send out, when three tokens away, and at every status change through payment.
+
+For centre staff, on a desktop:
+
+- Queue board per centre and date, with call-next, status advance, and no-show.
+- Slot capacity editor for the day's three windows, and a one-click reminder blast to everyone booked for tomorrow.
+- Notification log showing every message the system has sent.
+- Wait and service times computed from the recorded event timestamps.
+
+The interface is English and Hindi from a single dictionary (`lib/i18n.ts`). Farmer screens
+use large type, large touch targets, a text label beside every icon, and one primary action
+per screen. Noto Sans and Noto Sans Devanagari are committed to the repo, so Hindi renders
+without a network round trip.
+
+## Quick start
 
 ```bash
-# 0. one-time
 npm install
-
-# 1. reset + seed the world relative to *now* (run again any time; also 5 min before demoing)
-npm run demo:reset
-
-# 2. web app  → http://localhost:3000  (farmer)  ·  http://localhost:3000/admin  (staff)
+npm run demo:reset   # drops the database, recreates the schema, seeds relative to "now"
 npm run dev
-
 ```
 
-**Demo logins** — farmer: `9876500001` + OTP `123456` (Ramesh Kumar, Hindi UI) · any new number registers in-flow · admin: `admin / admin123`.
+Farmer app at http://localhost:3000, staff dashboard at http://localhost:3000/admin.
 
-## The 5-minute demo
+Sign in as the seeded farmer with `9876500001` and OTP `123456` (Ramesh Kumar, Hindi
+interface). Any other number registers a new farmer. The admin login is `admin` /
+`admin123`.
 
-1. **Phone**: log in as Ramesh → Home leads with today's booking, token **#18**, live position + ETA.
-2. **Book** (≤60 s): centre → date → window (% full) → Paddy 20 qtl → token + expected payment at MSP.
-3. **Desktop**: admin → **Call next token** → farmer at position ≤3 automatically gets the "3 tokens away" SMS (Notification log).
-4. **Advance status** on Ramesh's token → his phone updates within 10 s, step by step to **PAID** with amount + payment ref.
+The seed is destructive and computed from the current IST date, so bookings, events, and
+timestamps always land around today. Run `npm run demo:reset` again whenever the data has
+drifted or a demo is about to start.
 
 ## Architecture
 
-- **Next.js 15 (App Router, TS, Tailwind)** — farmer mobile-web + admin dashboard + API routes. No WebSockets; 10 s polling by design (works on weak rural connections and demo laptops alike).
-- **SQLite via Prisma** — schema is Postgres-portable (status is a `String` + TS union — SQLite has no enums). All queue/booking/payment logic lives in **`lib/services/*`** — v2's WhatsApp agent wraps these functions directly.
-- **Status machine**: `BOOKED → ARRIVED → SERVING → WEIGHED → PROCURED → PAYMENT_INITIATED → PAID` (+ `NO_SHOW`, `CANCELLED`). Every transition appends a `BookingEvent` and writes a `NotificationLog` SMS.
-- **IST-pinned dates** (`YYYY-MM-DD` strings) so "today" is correct whatever the laptop clock says.
-- **Booking is one transaction**: capacity check, per-centre-per-day token (unique constraint as race backstop), MSP amount, event, SMS. Tested under parallel load.
+![End-to-end flow: a farmer logs in with a phone OTP, books a slot, and tracks the queue, while centre staff call tokens and update procurement status against the same database.](architecture.png)
+
+A few decisions worth calling out:
+
+**All business logic sits in `lib/services`.** Pages and API routes are thin; they parse a
+request, call a service function, and render. The tests exercise that layer directly, and a
+future WhatsApp assistant would call the same functions (`bookSlot`, `getQueueStatus`,
+`advanceStatus`) rather than reimplementing them.
+
+**Every notification goes through `notify()`.** It writes a `NotificationLog` row and logs
+to the console. If `SEND_REAL_SMS=true` and Twilio credentials are set, the same function
+also relays a real SMS. One chokepoint means adding a channel does not touch booking or
+queue logic.
+
+**Polling, not WebSockets.** Ten-second freshness is enough for a physical queue, it
+survives a weak rural connection, it keeps the server stateless, and it behaves identically
+with no internet at all.
+
+**Booking is a single transaction.** Capacity is rechecked inside the transaction,
+`bookedCount` is incremented, the token is assigned as max plus one, and the amount, the
+`BOOKED` event, and the confirmation SMS are written together. A unique constraint on
+`(centreId, date, tokenNumber)` backs up the capacity check if two requests race, and the
+service retries on a unique-constraint conflict.
+
+**Dates are IST calendar strings.** Slots and bookings store `YYYY-MM-DD` rather than a
+timestamp, so "today" means the same thing regardless of the laptop's clock or timezone.
+
+**SQLite now, Postgres later.** The schema avoids SQLite-only features. Status is a `String`
+column plus a TypeScript union (`lib/status.ts`) because Prisma enums are unavailable on
+SQLite, so moving to Postgres is a datasource change rather than a rewrite.
+
+### Status pipeline
+
+```
+BOOKED → ARRIVED → SERVING → WEIGHED → PROCURED → PAYMENT_INITIATED → PAID
+    ↘ NO_SHOW (from BOOKED or ARRIVED)
+    ↘ CANCELLED (from BOOKED, admin only, frees the seat)
+```
+
+Each transition appends a `BookingEvent` row and sends one SMS. Skipping a step is
+rejected. A payment reference is generated at `PAYMENT_INITIATED`, and the `PAID` message
+carries the amount and that reference.
+
+Queue position counts the waiting bookings (`BOOKED` or `ARRIVED`) with a lower token at
+the same centre on the same date. The estimated wait is that position times the centre's
+average service time.
+
+### Data model
+
+Seven tables in `prisma/schema.prisma`: `Farmer`, `Centre`, `Slot`, `Booking`,
+`BookingEvent`, `NotificationLog`, `CropRate`. `Booking` denormalizes `centreId` and `date`
+from its slot so the queue queries, which run on every poll, avoid a join.
+
+## Project layout
+
+```
+app/
+  page.tsx                 farmer home: today's booking, token, live position
+  login/                   phone + OTP, registration folded in
+  book/                    centre → date → window → crop → confirm
+  bookings/[id]/           token slip and live tracker
+  admin/(dash)/            queue board, slot editor, notification log
+  api/                     farmer and admin routes
+lib/
+  services/                all business logic, tested here
+  i18n.ts  status.ts  dates.ts  messages.ts
+components/                token slip, token card, icons
+prisma/                    schema and the demo seed
+tests/                     Vitest suites against the service layer
+```
+
+## Tests
 
 ```bash
-npm test           # 22 vitest cases at the service seam (throwaway SQLite per file)
+npm test        # 18 Vitest cases
 npm run typecheck
 ```
 
-## Questions judges will ask (and our answers)
+Each suite gets a throwaway SQLite file copied from a template database, so the suites do
+not share state. Coverage is at the service seam: token sequencing, capacity rejection,
+event and SMS side effects, the full status pipeline and its invalid jumps, the
+three-tokens-away message firing exactly once, queue position and now-serving arithmetic,
+capacity edits, and the reminder blast.
 
-1. **Where does the training data come from?** Seeded — 180 days per centre from a documented generator (day-of-week × harvest-season × noise). That's why we report the model **against a seasonal-naive baseline** (same weekday last week): ±4.3 vs ±5.6 farmers/day, 23% better, on a 14-day holdout. The CSV is the swap point: drop in real FCI/mandi gate data and retrain, nothing else changes.
-2. **Are the SMS real?** Mocked by design (`notify()` writes the log you saw). Set `SEND_REAL_SMS=true` + Twilio creds and the same function sends real SMS. One chokepoint, so v2's WhatsApp agent plugs in without touching business logic.
-3. **What stops double-booking / overselling a window?** A single DB transaction: capacity re-checked, `bookedCount` incremented, token = max+1 with a `(centre, date, token)` unique constraint as backstop. A concurrency test fires 9 parallel bookings at a 5-seat window: exactly 5 succeed, tokens 1–5.
-4. **What if the farmer has no smartphone?** Booking is assisted-friendly (a relative, CSC kiosk, or centre staff can book by phone number); every update also lands as SMS, which works on feature phones. Voice/IVR is on the v2 roadmap.
-5. **How is the payment amount computed?** Declared quantity × the CCEA-notified MSP for the crop (seeded: paddy ₹2,441/₹2,461, wheat ₹2,585, maize ₹2,410, bajra ₹2,900 — KMS/RMS 2026-27). v1 tracks status + amount; actual disbursal rails (PFMS) are out of scope.
-6. **Why polling, not WebSockets?** 10 s freshness is enough for a physical queue, survives flaky rural networks, keeps the stack stateless, and demos identically offline.
-7. **Does it reduce waiting?** The dashboard measures it from real event timestamps (avg wait, measured service time per farmer). Slots and per-window capacity smooth arrivals — that's the mechanism; the seeded queue shows ~47 min avg wait, the point of comparison for unmanaged walk-ins.
-8. **How does it scale beyond 3 centres?** Schema is Postgres-portable; services are stateless; centres are rows, not code.
-9. **Aadhaar / eKYC?** Deliberately out of v1 — phone-OTP is the lowest-friction on-ramp. eKYC is an add-on at registration, not a redesign.
-10. **Why English SMS when the UI is Hindi?** v1 scope decision; the template layer is one function, so localized templates are a drop-in (v2 WhatsApp replies in the farmer's language).
+The concurrency case fires nine simultaneous bookings at a window with five seats. Five
+succeed with tokens 1 to 5, four are rejected.
 
-## Environment
+## Configuration
 
-| var | default | |
+Copy `.env.example` to `.env`. The defaults run the full demo.
+
+| Variable | Default | Purpose |
 |---|---|---|
-| `DATABASE_URL` | `file:./dev.db?connection_limit=1&socket_timeout=30` | SQLite |
-| `MOCK_MODE` | `true` | OTP fixed to 123456 |
-| `SEND_REAL_SMS` | `false` | Twilio relay off |
-| `TWILIO_*` | — | only for real SMS |
+| `DATABASE_URL` | `file:./dev.db?connection_limit=1&socket_timeout=30` | SQLite file |
+| `MOCK_MODE` | `true` | Accepts `123456` as the OTP for any number. With it off, login is refused rather than silently accepted, since v1 ships no OTP gateway |
+| `SEND_REAL_SMS` | `false` | Relay notifications to Twilio as well as the log |
+| `TWILIO_ACCOUNT_SID` | | Required only when `SEND_REAL_SMS=true` |
+| `TWILIO_AUTH_TOKEN` | | |
+| `TWILIO_SMS_FROM` | | |
 
-## v2 roadmap (kept out of v1 on purpose)
+## Seeded data
 
-WhatsApp LLM agent over the same service functions (`bookSlot`, `getQueueStatus`, …) replying in the farmer's language · voice/IVR · photo grain-quality pre-check · eKYC · PFMS payment rails.
+`npm run demo:reset` creates three Uttar Pradesh centres (Rampur, Shahjahanpur, Hardoi)
+with different daily capacities and service times, forty farmers, slots for three days
+either side of today, and bookings spread across every status with their event chains and
+notification trails. The random number generator is seeded, so two resets on the same day
+produce the same world.
+
+MSP rates are the CCEA-notified figures for KMS and RMS 2026-27: paddy common 2,441 and
+grade A 2,461, wheat 2,585, maize 2,410, bajra 2,900 rupees per quintal.
+
+## Scope
+
+Version 1 tracks procurement status and the payable amount. It does not move money;
+disbursal through PFMS is out of scope. Also deliberately left out: Aadhaar and eKYC
+(phone OTP is the lower-friction on-ramp, and eKYC is an addition at registration rather
+than a redesign), native apps, role-based access control for staff, and farmer-side
+cancellation. SMS templates are English only in v1 even though the interface is bilingual,
+because the template layer is a single module and localized templates drop in later.
+
+Planned next: a WhatsApp assistant calling the existing service functions, voice and IVR
+for farmers without a smartphone, and localized message templates.
+
+## Stack
+
+Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Prisma with SQLite, and
+Vitest. Four runtime dependencies in total.
