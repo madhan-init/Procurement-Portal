@@ -3,6 +3,22 @@ import { useCallback, useEffect, useState } from "react";
 import { STATUS_LABEL, STATUS_BADGE, inr } from "@/lib/status-ui";
 import { STATUS_ORDER } from "@/lib/status";
 import { IconMegaphone, IconSend } from "@/components/icons";
+import {
+  CARD,
+  COMMIT_SM,
+  COMMIT_XS,
+  GHOST_SM,
+  H2_PAGE,
+  LINK_XS,
+  NOTE,
+  TABLE,
+  TD,
+  TH,
+  THEAD,
+  TOAST_ERR,
+  TOAST_OK,
+  TR,
+} from "@/lib/ui";
 
 type Row = {
   id: number;
@@ -32,12 +48,10 @@ const NEXT_LABEL: Record<string, string> = {
 export default function QueueBoard({
   centreId,
   centreName,
-  avgServiceMinutes,
   today,
 }: {
   centreId: number;
   centreName: string;
-  avgServiceMinutes: number;
   today: string;
 }) {
   const [data, setData] = useState<QueueData | null>(null);
@@ -112,58 +126,58 @@ export default function QueueBoard({
       {/* Header row */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold">{centreName}</h1>
-          <p className="text-sm text-gray-400">
-            Today · {todayLabel} · avg service {avgServiceMinutes} min/farmer · refreshes every 10 s
+          <h1 className={H2_PAGE}>{centreName}</h1>
+          <p className={NOTE}>
+            Today · {todayLabel}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={sendReminders}
             disabled={remBusy}
-            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+            className={GHOST_SM}
           >
             <IconSend size={16} /> {remBusy ? "Sending…" : "Send tomorrow's reminders"}
           </button>
           <button
             onClick={callNext}
             disabled={busyId !== null || !data || s?.waiting === 0}
-            className="flex items-center gap-2 rounded-xl bg-leaf-600 px-5 py-2.5 font-semibold text-white shadow-sm hover:bg-leaf-700 disabled:opacity-40"
+            className={COMMIT_SM}
           >
             <IconMegaphone size={18} /> {busyId === "next" ? "Calling…" : "Call next"}
           </button>
         </div>
       </div>
 
-      {remToast && <p className="mt-3 rounded-lg bg-leaf-100 px-3 py-2 text-sm text-leaf-800">{remToast}</p>}
-      {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+      {remToast && <p className={TOAST_OK}>{remToast}</p>}
+      {error && <p className={TOAST_ERR}>{error}</p>}
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1fr_300px]">
         {/* Queue table */}
-        <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-gray-200/60 self-start">
-          <table className="w-full text-left text-[13px]">
-            <thead className="border-b border-gray-100 text-xs uppercase text-gray-400">
+        <div className={`self-start overflow-x-auto ${CARD}`}>
+          <table className={TABLE}>
+            <thead className={THEAD}>
               <tr>
-                <th className="px-4 py-3">Token</th>
-                <th className="px-4 py-3">Farmer</th>
-                <th className="px-4 py-3">Window</th>
-                <th className="px-4 py-3">Crop</th>
-                <th className="px-4 py-3 text-right">Qty (qtl)</th>
-                <th className="px-4 py-3 text-right">Amount</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className={TH}>Token</th>
+                <th className={TH}>Farmer</th>
+                <th className={TH}>Window</th>
+                <th className={TH}>Crop</th>
+                <th className={`${TH} text-right`}>Qty (qtl)</th>
+                <th className={`${TH} text-right`}>Amount</th>
+                <th className={TH}>Status</th>
+                <th className={`${TH} text-right`}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {!data ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-10 text-center text-[15px] text-[#A0A3A8]">
                     Loading queue…
                   </td>
                 </tr>
               ) : data.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-10 text-center text-[15px] text-[#A0A3A8]">
                     No bookings at this centre today.
                   </td>
                 </tr>
@@ -174,56 +188,60 @@ export default function QueueBoard({
                   return (
                     <tr
                       key={b.id}
-                      className={`border-b border-gray-50 last:border-0 ${
-                        b.status === "SERVING" ? "bg-[#EEEDFE]/60" : terminal ? "opacity-50" : ""
+                      className={`${TR} ${
+                        b.status === "SERVING" ? "bg-[#FFF6F2]" : terminal ? "opacity-45" : ""
                       }`}
                     >
-                      <td className="px-4 py-2.5 font-black text-[15px]">#{b.tokenNumber}</td>
-                      <td className="px-4 py-2.5">
-                        <span className="font-medium">{b.farmer.name}</span>
-                        <span className="block text-xs text-gray-400">
+                      <td className={`${TD} font-heading text-[17px] font-extrabold tracking-[-0.02em] text-[#111111]`}>
+                        #{b.tokenNumber}
+                      </td>
+                      <td className={TD}>
+                        <span className="font-medium text-[#111111]">{b.farmer.name}</span>
+                        <span className="block text-[13px] text-[#A0A3A8]">
                           {b.farmer.village} · {b.farmer.phone}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-gray-500">
+                      <td className={`${TD} text-[#6B7280]`}>
                         {b.slot.windowStart}–{b.slot.windowEnd}
                       </td>
-                      <td className="px-4 py-2.5">{b.crop}</td>
-                      <td className="px-4 py-2.5 text-right">{b.quantityQuintals}</td>
-                      <td className="px-4 py-2.5 text-right">{inr(b.amountPayable)}</td>
-                      <td className="px-4 py-2.5">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[b.status as keyof typeof STATUS_BADGE]}`}>
+                      <td className={TD}>{b.crop}</td>
+                      <td className={`${TD} text-right tabular-nums`}>{b.quantityQuintals}</td>
+                      <td className={`${TD} text-right tabular-nums`}>{inr(b.amountPayable)}</td>
+                      <td className={TD}>
+                        <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-bold ${STATUS_BADGE[b.status as keyof typeof STATUS_BADGE]}`}>
                           {STATUS_LABEL[b.status as keyof typeof STATUS_LABEL]}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-right">
-                        {(STATUS_ORDER as readonly string[]).includes(b.status) && b.status !== "PAID" && (
-                          <button
-                            onClick={() => advance(b.id)}
-                            disabled={busyId !== null}
-                            className="rounded-lg bg-leaf-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-leaf-700 disabled:opacity-40"
-                          >
-                            {busyId === b.id ? "…" : (NEXT_LABEL[b.status] ?? "Advance")}
-                          </button>
-                        )}
-                        {waiting && (
-                          <button
-                            onClick={() => advance(b.id, "NO_SHOW")}
-                            disabled={busyId !== null}
-                            className="ml-2 text-xs font-medium text-red-600 underline-offset-2 hover:underline disabled:opacity-40"
-                          >
-                            No-show
-                          </button>
-                        )}
-                        {b.status === "BOOKED" && (
-                          <button
-                            onClick={() => advance(b.id, "CANCELLED")}
-                            disabled={busyId !== null}
-                            className="ml-2 text-xs text-gray-400 underline-offset-2 hover:underline disabled:opacity-40"
-                          >
-                            Cancel
-                          </button>
-                        )}
+                      <td className={`${TD} text-right`}>
+                        <div className="flex flex-col items-end gap-1.5">
+                          {(STATUS_ORDER as readonly string[]).includes(b.status) && b.status !== "PAID" && (
+                            <button onClick={() => advance(b.id)} disabled={busyId !== null} className={COMMIT_XS}>
+                              {busyId === b.id ? "…" : (NEXT_LABEL[b.status] ?? "Advance")}
+                            </button>
+                          )}
+                          {(waiting || b.status === "BOOKED") && (
+                            <div className="flex items-center gap-3">
+                              {waiting && (
+                                <button
+                                  onClick={() => advance(b.id, "NO_SHOW")}
+                                  disabled={busyId !== null}
+                                  className={`${LINK_XS} text-[#E5484D]`}
+                                >
+                                  No-show
+                                </button>
+                              )}
+                              {b.status === "BOOKED" && (
+                                <button
+                                  onClick={() => advance(b.id, "CANCELLED")}
+                                  disabled={busyId !== null}
+                                  className={`${LINK_XS} text-[#A0A3A8]`}
+                                >
+                                  Cancel
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -236,17 +254,23 @@ export default function QueueBoard({
         {/* Right rail */}
         <div className="flex flex-col gap-4">
           {/* Now serving */}
-          <div className="rounded-xl bg-leaf-100 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-leaf-800">Now serving</p>
-            <p className="mt-1 text-5xl font-black text-leaf-900">{s?.nowServing ? `#${s.nowServing}` : "—"}</p>
-            <p className="mt-2 text-sm text-leaf-800">
+          <div className="rounded-xl border border-[#FB8A61]/40 bg-[#FFF6F2] p-5">
+            <p className="text-[12px] font-bold uppercase tracking-[0.11em] text-[#C2521E]">Now serving</p>
+            {s?.nowServing ? (
+              <p className="mt-1.5 font-heading text-[56px] font-extrabold leading-none tracking-[-0.04em] text-[#111111]">
+                #{s.nowServing}
+              </p>
+            ) : (
+              <p className="mt-2 text-[17px] font-medium text-[#C2521E]">Nobody at the counter</p>
+            )}
+            <p className="mt-2.5 text-[15px] text-[#6B7280]">
               Next {nextToken !== null ? `#${nextToken}` : "—"} · {s?.waiting ?? 0} in queue
             </p>
           </div>
 
           {/* Today */}
-          <div className="rounded-xl bg-white p-4 ring-1 ring-gray-200/60">
-            <p className="text-sm font-semibold">Today</p>
+          <div className={`p-5 ${CARD}`}>
+            <p className="text-[15px] font-semibold text-[#111111]">Today</p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {[
                 { label: "Avg wait (measured)", value: s?.avgWaitMin != null ? `${s.avgWaitMin} min` : "—" },
@@ -255,12 +279,12 @@ export default function QueueBoard({
                 { label: "No-shows", value: s?.noShows ?? "—" },
               ].map((t) => (
                 <div key={t.label}>
-                  <p className="text-lg font-bold">{t.value}</p>
-                  <p className="text-[11px] text-gray-400">{t.label}</p>
+                  <p className="text-[22px] font-bold tracking-[-0.02em] text-[#111111]">{t.value}</p>
+                  <p className="mt-0.5 text-[13px] text-[#A0A3A8]">{t.label}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-3 border-t border-gray-100 pt-2 text-[11px] text-gray-400">
+            <p className="mt-4 border-t border-[#EFEFF1] pt-3 text-[13px] text-[#A0A3A8]">
               Bookings today: {s?.total ?? "…"} · Waiting: {s?.waiting ?? "…"}
             </p>
           </div>
