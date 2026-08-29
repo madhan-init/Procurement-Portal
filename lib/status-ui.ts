@@ -1,5 +1,4 @@
 // Client-safe status presentation (no prisma imports).
-// Chip colors from the approved mockup palette.
 import type { BookingStatus } from "./status";
 
 export const STATUS_LABEL: Record<BookingStatus, string> = {
@@ -14,16 +13,19 @@ export const STATUS_LABEL: Record<BookingStatus, string> = {
   CANCELLED: "Cancelled",
 };
 
+// Chips in the coral/ink palette. Five tiers, not nine hues: waiting is
+// quiet, in-progress is coral (the live one), settled is ink, trouble is
+// danger. Read down a column of 30 rows and the state is obvious.
 export const STATUS_BADGE: Record<BookingStatus, string> = {
-  BOOKED: "bg-[#E6F1FB] text-[#0C447C]",
-  ARRIVED: "bg-[#FAEEDA] text-[#633806]",
-  SERVING: "bg-[#EEEDFE] text-[#3C3489] animate-pulse",
-  WEIGHED: "bg-[#EEEDFE] text-[#3C3489]",
-  PROCURED: "bg-[#DFF0EF] text-[#134E4A]",
-  PAYMENT_INITIATED: "bg-[#EAF3DE] text-[#3F6212]",
-  PAID: "bg-[#EAF3DE] text-[#27500A]",
-  NO_SHOW: "bg-[#FCEBEB] text-[#791F1F]",
-  CANCELLED: "bg-gray-200 text-gray-600",
+  BOOKED: "bg-[#F4F4F5] text-[#6B7280]",
+  ARRIVED: "bg-[#F4F4F5] text-[#111111]",
+  SERVING: "bg-[#FFF1EB] text-[#C2521E]",
+  WEIGHED: "bg-[#EFEFF1] text-[#111111]",
+  PROCURED: "bg-[#EFEFF1] text-[#111111]",
+  PAYMENT_INITIATED: "bg-[#EFEFF1] text-[#111111]",
+  PAID: "bg-[#111111] text-white",
+  NO_SHOW: "bg-[#FEF1F1] text-[#B4383C]",
+  CANCELLED: "bg-[#F4F4F5] text-[#A0A3A8]",
 };
 
 export function inr(n: number): string {
