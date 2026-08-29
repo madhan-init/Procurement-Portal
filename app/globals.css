@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Mandi Mitra design tokens (from the approved mockup)
+/* Procurement Portal design tokens
    primary leaf #3B6D11 · token slip wheat #FAEEDA/#854F0B/#412402
    page #F6F7F2 · cards white · 12px radius (rounded-xl) */
 @theme {
@@ -17,15 +17,13 @@
   --color-wheat-600: #854f0b;
   --color-wheat-700: #633806;
   --color-wheat-900: #412402;
-  --color-page: #f6f7f2;
   /* Outfit headings + DM Sans body — the polama.xyz pairing.
      `font-sans` and `font-heading` utilities generate from these. */
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-outfit), var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* White is the farmer app's surface. --color-page (#F6F7F2) is still the
-   admin surface — both admin roots paint it themselves, so nothing here. */
+/* White is the app surface, farmer and admin alike. */
 body {
   background: #ffffff;
   color: #1f2937;
