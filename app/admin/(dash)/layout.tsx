@@ -1,29 +1,36 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { IconWheat } from "@/components/icons";
+import { getLang } from "@/lib/lang";
+import BrandMark from "@/components/brand-mark";
 import AdminNav from "./admin-nav";
 
 export const dynamic = "force-dynamic";
 
+/** Admin shell — same white surface, borders and type as the farmer
+ *  screens; only the layout differs (dense, wide, tabbed). */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const centres = await prisma.centre.findMany({ orderBy: { id: "asc" }, select: { id: true, name: true, district: true } });
+  const centres = await prisma.centre.findMany({
+    orderBy: { id: "asc" },
+    select: { id: true, name: true, district: true },
+  });
+  const lang = await getLang();
+
   return (
-    <div className="min-h-screen bg-page">
-      <header className="sticky top-0 z-20 border-b border-gray-200/80 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
-          <Link href="/admin" className="flex items-center gap-2 font-bold">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-leaf-600 text-white">
-              <IconWheat size={18} />
-            </span>
-            <span>Mandi Mitra · Admin</span>
-          </Link>
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-20 border-b border-[#E4E4E7] bg-white">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-3.5">
+          <div className="flex shrink-0 items-baseline gap-2">
+            <BrandMark lang={lang} />
+            <span className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#A0A3A8]">Admin</span>
+          </div>
           <AdminNav centres={centres} />
-          <form action="/api/admin/logout" method="post" className="ml-auto">
-            <button className="rounded-lg px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-600">Logout</button>
+          <form action="/api/admin/logout" method="post" className="ml-auto shrink-0">
+            <button className="text-[15px] font-medium text-[#6B7280] underline-offset-4 transition-colors hover:text-[#111111] hover:underline">
+              Logout
+            </button>
           </form>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-6">{children}</main>
+      <main className="mx-auto max-w-[1400px] px-6 py-8">{children}</main>
     </div>
   );
 }

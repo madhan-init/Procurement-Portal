@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Chevron from "@/components/chevron";
+import { CHIP, FIELD_SM, PICK_OFF, PICK_ON } from "@/lib/ui";
 
 const TABS = [
   { href: "/admin", label: "Today's queue" },
@@ -16,30 +18,33 @@ export default function AdminNav({ centres }: { centres: { id: number; name: str
 
   return (
     <>
-      <nav className="flex items-center gap-1">
+      <nav className="flex items-center gap-1.5">
         {TABS.map((t) => (
           <Link
             key={t.href}
             href={`${t.href}?centre=${centre}`}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              pathname === t.href ? "bg-leaf-600 text-white" : "text-gray-500 hover:bg-gray-100"
-            }`}
+            aria-current={pathname === t.href ? "page" : undefined}
+            className={`${CHIP} ${pathname === t.href ? PICK_ON : PICK_OFF}`}
           >
             {t.label}
           </Link>
         ))}
       </nav>
-      <select
-        value={centre}
-        onChange={(e) => router.push(`${pathname}?centre=${e.target.value}`)}
-        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm"
-      >
-        {centres.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name} — {c.district}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          aria-label="Centre"
+          value={centre}
+          onChange={(e) => router.push(`${pathname}?centre=${e.target.value}`)}
+          className={`${FIELD_SM} appearance-none pr-10`}
+        >
+          {centres.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name} — {c.district}
+            </option>
+          ))}
+        </select>
+        <Chevron />
+      </div>
     </>
   );
 }
