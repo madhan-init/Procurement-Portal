@@ -1,5 +1,23 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { prettyDate } from "@/lib/dates";
+import {
+  CARD,
+  CHIP,
+  COMMIT_XS,
+  FIELD_SM,
+  H2_PAGE,
+  NOTE,
+  PICK_OFF,
+  PICK_ON,
+  TABLE,
+  TD,
+  TH,
+  THEAD,
+  TOAST_ERR,
+  TOAST_OK,
+  TR,
+} from "@/lib/ui";
 
 type SlotRow = { id: number; windowStart: string; windowEnd: string; capacity: number; bookedCount: number };
 
@@ -48,65 +66,63 @@ export default function SlotsEditor({ centreId, dates }: { centreId: number; dat
 
   return (
     <div>
-      <h1 className="text-xl font-bold">Slot capacity</h1>
-      <p className="text-sm text-gray-400">Windows are created automatically; capacity can never go below seats already booked.</p>
+      <h1 className={H2_PAGE}>Slot capacity</h1>
+      <p className={NOTE}>Windows are created automatically; capacity can never go below seats already booked.</p>
 
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {dates.map((d, i) => (
           <button
             key={d}
             onClick={() => setDate(d)}
-            className={`shrink-0 rounded-xl border px-3.5 py-2 text-sm font-medium ${
-              date === d ? "border-leaf-600 bg-leaf-600 text-white" : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-            }`}
+            className={`${CHIP} ${date === d ? PICK_ON : PICK_OFF}`}
           >
-            {i === 0 ? "Today" : i === 1 ? "Tomorrow" : d}
+            {i === 0 ? "Today" : i === 1 ? "Tomorrow" : prettyDate(d)}
           </button>
         ))}
       </div>
 
       {msg && (
-        <p className={`mt-3 rounded-lg px-3 py-2 text-sm ${msg.kind === "ok" ? "bg-leaf-100 text-leaf-800" : "bg-red-50 text-red-600"}`}>
+        <p className={msg.kind === "ok" ? TOAST_OK : TOAST_ERR}>
           {msg.text}
         </p>
       )}
 
-      <div className="mt-4 overflow-hidden rounded-xl bg-white ring-1 ring-gray-200/60">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-100 text-xs uppercase text-gray-400">
+      <div className={`mt-4 overflow-hidden ${CARD}`}>
+        <table className={TABLE}>
+          <thead className={THEAD}>
             <tr>
-              <th className="px-4 py-3">Window</th>
-              <th className="px-4 py-3 text-right">Booked</th>
-              <th className="px-4 py-3 text-right">Capacity</th>
-              <th className="px-4 py-3 text-right">Fill</th>
-              <th className="px-4 py-3 text-right"></th>
+              <th className={TH}>Window</th>
+              <th className={`${TH} text-right`}>Booked</th>
+              <th className={`${TH} text-right`}>Capacity</th>
+              <th className={`${TH} text-right`}>Fill</th>
+              <th className={`${TH} text-right`}></th>
             </tr>
           </thead>
           <tbody>
             {!slots ? (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Loading…</td></tr>
+              <tr><td colSpan={5} className="px-4 py-10 text-center text-[15px] text-[#A0A3A8]">Loading…</td></tr>
             ) : (
               slots.map((s) => {
                 const pct = s.capacity ? Math.min(100, Math.round((s.bookedCount / s.capacity) * 100)) : 0;
                 return (
-                  <tr key={s.id} className="border-b border-gray-50 last:border-0">
-                    <td className="px-4 py-3 font-medium">{s.windowStart}–{s.windowEnd}</td>
-                    <td className="px-4 py-3 text-right">{s.bookedCount}</td>
-                    <td className="px-4 py-3 text-right">
+                  <tr key={s.id} className={TR}>
+                    <td className={`${TD} font-medium text-[#111111]`}>{s.windowStart}–{s.windowEnd}</td>
+                    <td className={`${TD} text-right tabular-nums`}>{s.bookedCount}</td>
+                    <td className={`${TD} text-right`}>
                       <input
                         type="number"
                         min={s.bookedCount}
-                        className="w-20 rounded-lg border border-gray-300 px-2 py-1 text-right"
+                        className={`${FIELD_SM} w-24 text-right tabular-nums`}
                         value={draft[s.id] ?? ""}
                         onChange={(e) => setDraft({ ...draft, [s.id]: e.target.value })}
                       />
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-400">{pct}%</td>
-                    <td className="px-4 py-3 text-right">
+                    <td className={`${TD} text-right tabular-nums text-[#A0A3A8]`}>{pct}%</td>
+                    <td className={`${TD} text-right`}>
                       <button
                         onClick={() => save(s.id)}
                         disabled={busy || Number(draft[s.id]) === s.capacity}
-                        className="rounded-lg bg-leaf-600 px-3 py-1 text-xs font-medium text-white hover:bg-leaf-700 disabled:opacity-30"
+                        className={COMMIT_XS}
                       >
                         Save
                       </button>
