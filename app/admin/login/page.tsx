@@ -1,7 +1,10 @@
 "use client";
+/* Admin sign-in — the farmer login screen's shell and tokens, one form. */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { IconWheat } from "@/components/icons";
+import BrandMark from "@/components/brand-mark";
+import ErrorLine from "@/components/error-line";
+import { COLUMN, COMMIT, FIELD, FIELD_BAD, FIELD_LINE, FOOTNOTE, H1, HEADER, LABEL, SHELL, SUB } from "@/lib/ui";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -14,47 +17,79 @@ export default function AdminLogin() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    setBusy(false);
-    if (res.ok) {
-      router.push("/admin");
-      router.refresh();
-    } else {
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      if (res.ok) {
+        router.push("/admin");
+        router.refresh();
+        return;
+      }
       setError("Invalid credentials");
+    } catch {
+      setError("Can't reach the server. Check your connection and try again");
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-page p-6">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200/60">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-leaf-600 text-white">
-          <IconWheat size={26} />
+    <main className={SHELL}>
+      <header className={HEADER}>
+        <div className="flex items-baseline gap-2">
+          <BrandMark lang="en" />
+          <span className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#A0A3A8]">Admin</span>
         </div>
-        <h1 className="mt-3 text-center text-xl font-bold">Mandi Mitra · Centre Admin</h1>
-        <p className="mt-1 text-center text-xs text-gray-400">MSP Procurement · staff dashboard</p>
-        <input
-          className="mt-6 w-full rounded-xl border border-gray-300 px-3 py-2.5"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          className="mt-3 w-full rounded-xl border border-gray-300 px-3 py-2.5"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button disabled={busy} className="mt-5 w-full rounded-xl bg-leaf-600 py-2.5 font-semibold text-white hover:bg-leaf-700 disabled:opacity-50">
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-        {error && <p className="mt-3 text-center text-sm text-red-600">{error}</p>}
-        <p className="mt-4 text-center text-xs text-gray-300">demo: admin / admin123</p>
-      </form>
+      </header>
+
+      <div className="flex min-h-[calc(100vh-104px)] items-center justify-center px-6 pb-[14vh]">
+        <div className={COLUMN}>
+          <h1 className={H1}>Centre sign-in</h1>
+          <p className={SUB}>MSP Procurement · staff dashboard</p>
+
+          <ErrorLine message={error} />
+
+          <form onSubmit={submit} className="mt-4 space-y-5" noValidate>
+            <div>
+              <label htmlFor="admin-user" className={`mb-2 ${LABEL}`}>
+                Username
+              </label>
+              <input
+                id="admin-user"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className={`${FIELD} ${error ? FIELD_BAD : FIELD_LINE}`}
+              />
+            </div>
+            <div>
+              <label htmlFor="admin-pass" className={`mb-2 ${LABEL}`}>
+                Password
+              </label>
+              <input
+                id="admin-pass"
+                type="password"
+                autoComplete="current-password"
+                autoFocus
+                value={password}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "screen-error" : undefined}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${FIELD} ${error ? FIELD_BAD : FIELD_LINE}`}
+              />
+            </div>
+
+            <button type="submit" disabled={busy} className={`mt-3 ${COMMIT}`}>
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+
+          <p className={`mt-8 ${FOOTNOTE}`}>demo: admin / admin123</p>
+        </div>
+      </div>
     </main>
   );
 }
